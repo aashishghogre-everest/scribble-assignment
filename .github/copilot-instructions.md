@@ -3,6 +3,6 @@
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
 
-Plan: specs/001-frontend-env-config/plan.md
+Plan: specs/002-room-hosting-lobby/plan.md
 
 <!-- SPECKIT END -->
