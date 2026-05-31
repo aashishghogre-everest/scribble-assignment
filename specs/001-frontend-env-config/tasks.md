@@ -8,15 +8,15 @@ title: "Tasks: Frontend Environment Configuration"
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Create `frontend/.env.example` with the required keys (`VITE_API_URL`, `VITE_FEATURE_DRAWING_ENABLED`) and non-secret defaults (file: frontend/.env.example)
-- [ ] T002 [P] Add `.gitignore` entries for local env overrides in `frontend/.gitignore` (add: .env.local, .env.\*.local)
-- [ ] T003 [P] Add a development runtime override sample at `frontend/public/config.json` with placeholder keys (file: frontend/public/config.json)
+- [x] T001 Create `frontend/.env.example` with the required keys (`VITE_API_URL`, `VITE_FEATURE_DRAWING_ENABLED`) and non-secret defaults (file: frontend/.env.example)
+- [x] T002 [P] Add `.gitignore` entries for local env overrides in `frontend/.gitignore` (add: .env.local, .env.\*.local)
+- [x] T003 [P] Add a development runtime override sample at `frontend/public/config.json` with placeholder keys (file: frontend/public/config.json)
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Create a runtime bootstrap for config loading at `frontend/src/config/bootstrap.ts` that reads Vite envs and (in dev) `public/config.json` (file: frontend/src/config/bootstrap.ts)
+- [x] T004 Create a runtime bootstrap for config loading at `frontend/src/config/bootstrap.ts` that reads Vite envs and (in dev) `public/config.json` (file: frontend/src/config/bootstrap.ts)
 - [ ] T005 [P] Update `frontend/vite.config.ts` to ensure Vite exposes `VITE_` prefixed variables (file: frontend/vite.config.ts)
 
 ---
@@ -28,7 +28,7 @@ title: "Tasks: Frontend Environment Configuration"
 **Independent Test**: Follow `specs/001-frontend-env-config/quickstart.md` and verify the app boots using values from `frontend/.env.local` or `frontend/public/config.json` in dev.
 
 - [ ] T006 [US1] Update `specs/001-frontend-env-config/quickstart.md` to include exact commands and file paths for creating `frontend/.env.local` and using `frontend/public/config.json` (file: specs/001-frontend-env-config/quickstart.md)
-- [ ] T007 [P] [US1] Integrate `frontend/src/config/bootstrap.ts` into app entrypoint by importing it from `frontend/src/main.tsx` (file: frontend/src/main.tsx)
+- [x] T007 [P] [US1] Integrate `frontend/src/config/bootstrap.ts` into app entrypoint by importing it from `frontend/src/main.tsx` (file: frontend/src/main.tsx)
 
 ---
 
