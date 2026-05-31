@@ -23,6 +23,8 @@ import {
   appendCanvasEvent,
   restartRoom
 } from "../services/roomStore.js";
+import { reconnectSchema } from "./schemas.js";
+import { reconnectParticipant } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -191,6 +193,27 @@ export function createRoomsRouter() {
       }
 
       response.json({
+        room: toRoomSnapshot((result as any).room, participantId)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST reconnect — allow clients with a previous participantId to reattach
+  router.post("/:code/reconnect", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = reconnectSchema.parse(request.body);
+
+      const result = reconnectParticipant(code.toUpperCase(), participantId);
+
+      if ((result as any).reason === "not-found") {
+        throw new HttpError(404, "Unable to find room or participant");
+      }
+
+      response.json({
+        participantId: (result as any).participantId,
         room: toRoomSnapshot((result as any).room, participantId)
       });
     } catch (error) {

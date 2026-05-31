@@ -60,13 +60,13 @@
 
 ### Tests
 
-- [ ] T019 [P] [US2] Add integration test for reconnect flow: `backend/src/api/reconnect.integration.test.ts`
+- [x] T019 [P] [US2] Add integration test for reconnect flow: `backend/src/api/reconnect.integration.test.ts`
 
 ### Implementation
 
-- [ ] T020 [US2] Implement reconnection reconciliation window in `backend/src/services/roomStore.ts` or `backend/src/services/roomCleanup.ts` to map reconnects back to preserved players
-- [ ] T021 [US2] Update `backend/src/api/rooms.ts` to accept reconnect attempts and restore player connection status without losing score
-- [ ] T022 [US2] Add frontend reconnect logic in `frontend/src/services/polling.ts` and `frontend/src/state/roomStore.ts` to retry joining and reconcile local UI state with server roster
+- [x] T020 [US2] Implement reconnection reconciliation window in `backend/src/services/roomStore.ts` or `backend/src/services/roomCleanup.ts` to map reconnects back to preserved players
+- [x] T021 [US2] Update `backend/src/api/rooms.ts` to accept reconnect attempts and restore player connection status without losing score
+- [x] T022 [US2] Add frontend reconnect logic in `frontend/src/services/polling.ts` and `frontend/src/state/roomStore.ts` to retry joining and reconcile local UI state with server roster
 
 **Checkpoint**: Reconnects during results are reconciled into preserved player list
 
