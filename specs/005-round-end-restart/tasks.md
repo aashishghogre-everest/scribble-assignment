@@ -4,20 +4,23 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Update project docs to reference the feature: specs/005-round-end-restart/README.md
-- [ ] T002 [P] Add plan & spec links in `.github/copilot-instructions.md` (already updated)
-- [ ] T003 [P] Ensure TypeScript strict settings and `vitest` config are present for new tests (frontend and backend): `frontend/vitest.config.ts`, `backend/vitest.config.ts`
+- [x] T001 Update project docs to reference the feature: specs/005-round-end-restart/README.md
+- [x] T002 [P] Add plan & spec links in `.github/copilot-instructions.md` (already updated)
+- [x] T003 [P] Ensure TypeScript strict settings and `vitest` config are present for new tests (frontend and backend): `frontend/vitest.config.ts`, `backend/vitest.config.ts`
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
+**TEST-FIRST: Write tests first and ensure they FAIL before implementing.**
+
 - [ ] T004 [P] Add `lastRoundSummary` field to in-memory Room model: `backend/src/models/game.ts`
 - [ ] T005 [P] Add Zod schema for `RoundSummary` and export in `backend/src/api/schemas.ts`
-- [ ] T006 [P] Implement backend endpoint `GET /rooms/:code/last-round-summary` in `backend/src/api/rooms.ts`
-- [ ] T007 [P] Implement backend endpoint `POST /rooms/:code/restart` in `backend/src/api/rooms.ts` and ensure it clears transient round state while preserving room player roster
-- [ ] T008 [P] Add unit/integration tests for new endpoints: `backend/src/api/restart.integration.test.ts`
-- [ ] T009 [P] Add or update polling client helper to fetch `last-round-summary` in `frontend/src/services/api.ts`
+- [ ] T006 [P] [TEST] Add integration test asserting per-round secrets are cleared after restart: `backend/src/api/restart.secrets.test.ts`
+- [ ] T007 [P] Add unit/integration tests for new endpoints: `backend/src/api/restart.integration.test.ts`
+- [ ] T008 [P] Implement backend endpoint `GET /rooms/:code/last-round-summary` in `backend/src/api/rooms.ts`
+- [ ] T009 [P] Implement backend endpoint `POST /rooms/:code/restart` in `backend/src/api/rooms.ts` and ensure it clears transient round state while preserving room player roster
+- [ ] T010 [P] Add or update polling client helper to fetch `last-round-summary` in `frontend/src/services/api.ts`
 
 **Checkpoint**: Foundation complete — backend endpoints and models exist and are test-covered
 
@@ -27,20 +30,23 @@
 
 **Goal**: Build a `ResultsPage` UI that displays the correct word, final scores, and full guess history, and supports returning players to the lobby after host restart.
 
-**Independent Test**: Start a room, complete a round to show results, call `POST /rooms/:code/restart`, verify UI shows results and then lobby with preserved players.
+**Independent Test**: Start a room, complete a round to show the ResultsPage, call `POST /rooms/:code/restart`, verify UI shows the ResultsPage and then lobby with preserved players.
 
 ### Tests (recommended)
 
-- [ ] T010 [P] [US1] Add component tests for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
-- [ ] T011 [US1] Add end-to-end integration test simulating round end and host restart: `frontend/src/__tests__/restart.flow.test.tsx` or `backend/src/api/restart.integration.test.ts` (integration pair)
+**TEST-FIRST: Component tests must be written and failing before implementing `ResultsPage`.**
+
+- [ ] T011 [P] [US1] Add component tests for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
+- [ ] T012 [US1] Add end-to-end integration test simulating round end and host restart: `frontend/src/__tests__/restart.flow.test.tsx` or `backend/src/api/restart.integration.test.ts` (integration pair)
+- [ ] T013 [US1] [TEST] Add timing integration test asserting lobby shows cleared round state within 3 seconds after restart: `backend/src/api/restart.timing.test.ts` or pairing with frontend flow
 
 ### Implementation
 
-- [ ] T012 [P] [US1] Create `ResultsPage` component at `frontend/src/components/ResultsPage.tsx` displaying `word`, `finalScores`, and `guessHistory`
-- [ ] T013 [US1] Wire `ResultsPage` into routing/pages: `frontend/src/pages/GamePage.tsx` or `frontend/src/routes/index.tsx`
-- [ ] T014 [US1] Add `Return to Lobby` button that calls `GET /rooms/:code/last-round-summary` (for verification) then navigates to lobby: `frontend/src/components/ResultsPage.tsx` (handler)
-- [ ] T015 [US1] Ensure `frontend/src/state/roomStore.ts` preserves player list and updates UI after restart
-- [ ] T016 [US1] Add logging and error handling for failed fetches in `frontend/src/services/api.ts` and display polite UI errors in `ResultsPage`
+- [ ] T014 [P] [US1] Create `ResultsPage` component at `frontend/src/components/ResultsPage.tsx` displaying `word`, `finalScores`, and `guessHistory`
+- [ ] T015 [P] [US1] Wire `ResultsPage` into routing/pages: `frontend/src/pages/GamePage.tsx` or `frontend/src/routes/index.tsx`
+- [ ] T016 [P] [US1] Add `Return to Lobby` button that calls `GET /rooms/:code/last-round-summary` (for verification) then navigates to lobby: `frontend/src/components/ResultsPage.tsx` (handler)
+- [ ] T017 [P] [US1] Ensure `frontend/src/state/roomStore.ts` preserves player list and updates UI after restart
+- [ ] T018 [P] [US1] Add logging and error handling for failed fetches in `frontend/src/services/api.ts` and display polite UI errors in `ResultsPage`
 
 **Checkpoint**: Results page implemented, tested, and integrated with existing room flow
 
@@ -48,19 +54,19 @@
 
 ## Phase 4: User Story 2 - Edge Connectivity and Rejoins (Priority: P2)
 
-**Goal**: Ensure disconnected players during results are preserved and can rejoin with their score after restart.
+**Goal**: Ensure disconnected players during ResultsPage are preserved and can rejoin with their score after restart.
 
-**Independent Test**: Simulate disconnect during results, restart host, reconnect player, verify player present with preserved score.
+**Independent Test**: Simulate disconnect during ResultsPage, restart host, reconnect player, verify player present with preserved score.
 
 ### Tests
 
-- [ ] T017 [P] [US2] Add integration test for reconnect flow: `backend/src/api/reconnect.integration.test.ts`
+- [ ] T019 [P] [US2] Add integration test for reconnect flow: `backend/src/api/reconnect.integration.test.ts`
 
 ### Implementation
 
-- [ ] T018 [US2] Implement reconnection reconciliation window in `backend/src/services/roomStore.ts` or `backend/src/services/roomCleanup.ts` to map reconnects back to preserved players
-- [ ] T019 [US2] Update `backend/src/api/rooms.ts` to accept reconnect attempts and restore player connection status without losing score
-- [ ] T020 [US2] Add frontend reconnect logic in `frontend/src/services/polling.ts` and `frontend/src/state/roomStore.ts` to retry joining and reconcile local UI state with server roster
+- [ ] T020 [US2] Implement reconnection reconciliation window in `backend/src/services/roomStore.ts` or `backend/src/services/roomCleanup.ts` to map reconnects back to preserved players
+- [ ] T021 [US2] Update `backend/src/api/rooms.ts` to accept reconnect attempts and restore player connection status without losing score
+- [ ] T022 [US2] Add frontend reconnect logic in `frontend/src/services/polling.ts` and `frontend/src/state/roomStore.ts` to retry joining and reconcile local UI state with server roster
 
 **Checkpoint**: Reconnects during results are reconciled into preserved player list
 
@@ -68,13 +74,13 @@
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T021 [P] [Polish] Add UI tests and accessibility checks for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
-- [ ] T022 [P] [Polish] Update `specs/005-round-end-restart/quickstart.md` with exact commands and sample payloads
-- [ ] T023 [Polish] Add documentation of API contracts in `specs/005-round-end-restart/contracts/api-contracts.md` (already created — verify)
-- [ ] T024 [P] [Polish] Run `vitest` full test-suite and fix any regressions
-- [ ] T025 [Polish] Update CHANGELOG or release notes with feature entry
+- [ ] T023 [P] [Polish] Add UI tests and accessibility checks for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
+- [ ] T024 [P] [Polish] Update `specs/005-round-end-restart/quickstart.md` with exact commands and sample payloads
+- [ ] T025 [Polish] Add documentation of API contracts in `specs/005-round-end-restart/contracts/api-contracts.md` (already created — verify)
+- [ ] T026 [P] [Polish] Run `vitest` full test-suite and fix any regressions
+- [ ] T027 [Polish] Update CHANGELOG or release notes with feature entry
 
----
+## **Notes on Test-First enforcement:** Marked tests (T006, T007, T011, T012, T013) are blocking — they should be implemented and failing before their corresponding implementation tasks are started. Update CI/dev checklist to reflect this gating.
 
 ## Dependencies & Execution Order
 
@@ -83,9 +89,9 @@
 
 ## Parallel Opportunities
 
-- Backend endpoints (`T006`, `T007`, `T008`) can be implemented in parallel with frontend component scaffolding (`T012`, `T013`, `T015`) once `T004` and `T005` are in place
+- Backend endpoints (`T008`, `T009`) can be implemented in parallel with frontend component scaffolding (`T014`, `T015`, `T017`) once `T004` and `T005` are in place
 
 ## Implementation Strategy
 
-- MVP: Complete Phase 1 + Phase 2 + Phase 3 (US1) to deliver an independently testable results view and restart flow
+- MVP: Complete Phase 1 + Phase 2 + Phase 3 (US1) to deliver an independently testable ResultsPage and restart flow
 - Incrementally add US2 and polish items after MVP verification
