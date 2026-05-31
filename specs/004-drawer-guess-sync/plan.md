@@ -11,6 +11,8 @@ Implement guess submission, validation, scoring, and polling-based synchronizati
 3. Scoring: Implement scoring logic (100 for correct, 0 otherwise) and persist to player scores.
 4. Persistence: Extend room state to store guess history and canvas actions for the drawer.
 5. Frontend: Add submit-guess flow, client-side trimming, and error handling; poll `GET /rooms/:roomId/guesses` to sync history.
+   - Add Drawer drawing UI: implement a `DrawerCanvas` component (drawer-only interactive canvas; read-only for guessers).
+   - Capture canvas events client-side and POST them to `POST /rooms/:code/canvas-events` with throttling/batching as appropriate. Ensure drawer rehydration after reload via server-stored events.
 6. Tests: Unit tests for validation and scoring; integration tests to assert history sync and scoring behavior.
 7. Docs: Update quickstart and spec notes.
 
@@ -19,6 +21,7 @@ Implement guess submission, validation, scoring, and polling-based synchronizati
 - M1: API + validation + unit tests
 - M2: Scoring + persistence + integration test
 - M3: Frontend submission + polling + visual verification
+- M3: Frontend drawing UI + submission + polling + visual verification
 - M4: Documentation and cleanup
 
 ## Risks

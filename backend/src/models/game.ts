@@ -33,6 +33,10 @@ export interface Room {
   drawerId?: string;
   // secret word for the active round (server-only)
   secretWord?: string;
+  // per-round guess history (chronological)
+  guesses?: Guess[];
+  // immutable canvas events stored for drawer rehydration
+  canvasEvents?: CanvasEvent[];
   createdAt: string;
   updatedAt: string;
 }
@@ -48,9 +52,26 @@ export interface RoomSnapshot {
   roles: ParticipantRole[];
   // secret word is present only for the drawer viewing their own room snapshot
   secretWord?: string;
+  // canvas events included for all viewers (read-only for non-drawers)
+  canvasEvents?: CanvasEvent[];
 }
 
 export interface RoomSessionResponse {
   participantId: string;
   room: RoomSnapshot;
+}
+
+export interface Guess {
+  playerId: string;
+  textTrimmed: string;
+  timestamp: string;
+  isCorrect: boolean;
+}
+
+export type CanvasEventType = "draw" | "clear";
+
+export interface CanvasEvent {
+  type: CanvasEventType;
+  payload?: unknown;
+  timestamp: string;
 }

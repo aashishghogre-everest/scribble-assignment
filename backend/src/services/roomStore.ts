@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Participant, Room, RoomSnapshot } from "../models/game.js";
+import type { Guess, CanvasEvent } from "../models/game.js";
 import { STARTER_ROLES, STARTER_WORDS } from "../seed/starterData.js";
 import { selectDeterministicWord } from "./wordSelector.js";
 
@@ -74,6 +75,8 @@ export function createRoom(playerName?: string) {
     hostId: participant.id,
     seed: randomUUID(),
     starterWordList: listWords(),
+    guesses: [],
+    canvasEvents: [],
     createdAt: now(),
     updatedAt: now()
   };
@@ -154,7 +157,78 @@ export function toRoomSnapshot(
     snapshot.secretWord = room.secretWord;
   }
 
+  // include canvas events for all viewers so non-drawers can see read-only updates
+  snapshot.canvasEvents = room.canvasEvents ? [...room.canvasEvents] : [];
+
   return snapshot;
+}
+
+export function submitGuess(
+  code: string,
+  participantId: string,
+  rawText: string
+): { guess: Guess; updatedRoom?: Room } | { reason: string } {
+  const room = rooms.get(code);
+
+  if (!room) return { reason: "not-found" } as const;
+  if (room.status !== "in-game") return { reason: "not-in-game" } as const;
+
+  const textTrimmed = rawText.trim();
+  if (textTrimmed.length === 0) return { reason: "empty" } as const;
+  if (textTrimmed.length > 200) return { reason: "too-long" } as const;
+
+  const isCorrect =
+    !!room.secretWord &&
+    textTrimmed.toLowerCase() === room.secretWord.toLowerCase();
+
+  const guess: Guess = {
+    playerId: participantId,
+    textTrimmed,
+    timestamp: now(),
+    isCorrect
+  };
+
+  room.guesses = room.guesses ?? [];
+  room.guesses.push(guess);
+
+  // award points for correct guess
+  if (isCorrect) {
+    const participant = room.participants.find((p) => p.id === participantId);
+    // simple score stored on participant as `score` (create if missing)
+    if (participant) {
+      // @ts-expect-error add score dynamically
+      participant.score = (participant as any).score
+        ? (participant as any).score + 100
+        : 100;
+    }
+  }
+
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  return { guess, updatedRoom: cloneRoom(room) } as const;
+}
+
+export function getGuesses(code: string) {
+  const room = rooms.get(code);
+  if (!room) return null;
+  return room.guesses ? [...room.guesses] : [];
+}
+
+export function appendCanvasEvent(
+  code: string,
+  participantId: string,
+  event: CanvasEvent
+) {
+  const room = rooms.get(code);
+  if (!room) return { reason: "not-found" } as const;
+  if (room.drawerId !== participantId)
+    return { reason: "not-authorized" } as const;
+  room.canvasEvents = room.canvasEvents ?? [];
+  room.canvasEvents.push(event);
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+  return { ok: true } as const;
 }
 
 export function assignDrawerForFirstRound(room: Room) {
