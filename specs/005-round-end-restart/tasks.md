@@ -36,17 +36,17 @@
 
 **TEST-FIRST: Component tests must be written and failing before implementing `ResultsPage`.**
 
-- [ ] T011 [P] [US1] Add component tests for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
-- [ ] T012 [US1] Add end-to-end integration test simulating round end and host restart: `frontend/src/__tests__/restart.flow.test.tsx` or `backend/src/api/restart.integration.test.ts` (integration pair)
-- [ ] T013 [US1] [TEST] Add timing integration test asserting lobby shows cleared round state within 3 seconds after restart: `backend/src/api/restart.timing.test.ts` or pairing with frontend flow
+- [x] T011 [P] [US1] Add component tests for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
+- [x] T012 [US1] Add end-to-end integration test simulating round end and host restart: `frontend/src/__tests__/restart.flow.test.tsx` or `backend/src/api/restart.integration.test.ts` (integration pair)
+- [x] T013 [US1] [TEST] Add timing integration test asserting lobby shows cleared round state within 3 seconds after restart: `backend/src/api/restart.timing.test.ts` or pairing with frontend flow
 
 ### Implementation
 
-- [ ] T014 [P] [US1] Create `ResultsPage` component at `frontend/src/components/ResultsPage.tsx` displaying `word`, `finalScores`, and `guessHistory`
-- [ ] T015 [P] [US1] Wire `ResultsPage` into routing/pages: `frontend/src/pages/GamePage.tsx` or `frontend/src/routes/index.tsx`
-- [ ] T016 [P] [US1] Add `Return to Lobby` button that calls `GET /rooms/:code/last-round-summary` (for verification) then navigates to lobby: `frontend/src/components/ResultsPage.tsx` (handler)
-- [ ] T017 [P] [US1] Ensure `frontend/src/state/roomStore.ts` preserves player list and updates UI after restart
-- [ ] T018 [P] [US1] Add logging and error handling for failed fetches in `frontend/src/services/api.ts` and display polite UI errors in `ResultsPage`
+- [x] T014 [P] [US1] Create `ResultsPage` component at `frontend/src/components/ResultsPage.tsx` displaying `word`, `finalScores`, and `guessHistory`
+- [x] T015 [P] [US1] Wire `ResultsPage` into routing/pages: `frontend/src/pages/GamePage.tsx` or `frontend/src/routes/index.tsx`
+- [x] T016 [P] [US1] Add `Return to Lobby` button that calls `GET /rooms/:code/last-round-summary` (for verification) then navigates to lobby: `frontend/src/components/ResultsPage.tsx` (handler)
+- [x] T017 [P] [US1] Ensure `frontend/src/state/roomStore.ts` preserves player list and updates UI after restart
+- [x] T018 [P] [US1] Add logging and error handling for failed fetches in `frontend/src/services/api.ts` and display polite UI errors in `ResultsPage`
 
 **Checkpoint**: Results page implemented, tested, and integrated with existing room flow
 
