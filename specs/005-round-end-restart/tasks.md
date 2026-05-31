@@ -74,11 +74,11 @@
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T023 [P] [Polish] Add UI tests and accessibility checks for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
-- [ ] T024 [P] [Polish] Update `specs/005-round-end-restart/quickstart.md` with exact commands and sample payloads
-- [ ] T025 [Polish] Add documentation of API contracts in `specs/005-round-end-restart/contracts/api-contracts.md` (already created — verify)
-- [ ] T026 [P] [Polish] Run `vitest` full test-suite and fix any regressions
-- [ ] T027 [Polish] Update CHANGELOG or release notes with feature entry
+- [x] T023 [P] [Polish] Add UI tests and accessibility checks for `ResultsPage` in `frontend/src/components/ResultsPage.test.tsx`
+- [x] T024 [P] [Polish] Update `specs/005-round-end-restart/quickstart.md` with exact commands and sample payloads
+- [x] T025 [Polish] Add documentation of API contracts in `specs/005-round-end-restart/contracts/api-contracts.md` (already created — verify)
+- [x] T026 [P] [Polish] Run `vitest` full test-suite and fix any regressions
+- [x] T027 [Polish] Update CHANGELOG or release notes with feature entry
 
 ## **Notes on Test-First enforcement:** Marked tests (T006, T007, T011, T012, T013) are blocking — they should be implemented and failing before their corresponding implementation tasks are started. Update CI/dev checklist to reflect this gating.
 
