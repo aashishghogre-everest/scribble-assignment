@@ -1,11 +1,20 @@
 import { z } from "zod";
 
+// Accept optional playerName, but if provided trim and require at least one character
+const optionalTrimmedName = z
+  .string()
+  .optional()
+  .transform((v) => (v === undefined ? undefined : v.trim()))
+  .refine((v) => v === undefined || v.length > 0, {
+    message: "Please enter a name."
+  });
+
 export const createRoomSchema = z.object({
-  playerName: z.string().optional()
+  playerName: optionalTrimmedName
 });
 
 export const joinRoomSchema = z.object({
-  playerName: z.string().optional()
+  playerName: optionalTrimmedName
 });
 
 export const roomCodeParamsSchema = z.object({
