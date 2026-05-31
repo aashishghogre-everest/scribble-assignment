@@ -1,40 +1,32 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Drawer Selection & Word Visibility
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `004-drawer-guess-sync` | **Date**: 2026-05-31 | **Spec**: specs/003-drawer-selection/spec.md
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Input**: Feature specification from `/specs/003-drawer-selection/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Assign the drawer for the first round to the host (or the first joined player if the host is absent), enforce trimmed/non-empty `displayName` on client and server, and provide a deterministic secret-word selection algorithm based on the room `seed` and round index. Server-side access controls must ensure only the drawer receives the secret word.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: TypeScript (Node.js + frontend TypeScript/React), repo uses ES modules and tsconfig.json.
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: Node.js, Express, Zod, React, Vite, vitest.
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: In-memory runtime state only (per constitution). No external DBs.
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: `vitest` for unit and integration tests; tests must be added before or alongside implementation (Test-First).
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: Local development / Node.js server + browser frontend.
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: Web application with separate `backend/` and `frontend/` packages.
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: Low-latency round-start operations; no specific RPS target required for this feature.
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: Follow repository constitution: TypeScript-first, Zod for validation, HTTP polling only (no WebSockets), in-memory state only, tests required via `vitest`.
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: Small feature scoped to game room lifecycle and round start logic; affects backend room/round models and frontend `GamePage` display.
 
 ## Constitution Check
 
@@ -48,6 +40,15 @@ Gates determined by repository constitution (examples):
 - No WebSockets: realtime push protocols are prohibited
 - In-Memory Only: no external databases or persistent stores
 - CI gates: tests and lint must pass before merge
+
+Assessment: PASS — Proposed changes adhere to the constitution. Implementation will:
+
+- Keep all data in-memory (`backend/src/models/game.ts`, `backend/src/services/roomStore.ts`).
+- Use Zod for server-side request/schema validation (`backend/src/api/schemas.ts`).
+- Add `vitest` unit and integration tests alongside implementation (tests referenced in tasks).
+- Use HTTP endpoints and polling; no WebSockets will be added.
+
+If any future decision requires a constitution exception, document the reason in this plan and obtain approval.
 
 ## Project Structure
 
