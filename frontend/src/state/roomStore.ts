@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
   type PropsWithChildren
 } from "react";
+import { createPoller } from "../services/polling";
 import {
   api,
   type RoomSessionResponse,
@@ -18,16 +19,18 @@ export interface RoomState {
   participantId: string | null;
   error: string | null;
   isLoading: boolean;
+  guesses: unknown[];
 }
 
 type Listener = () => void;
 
-class RoomStore {
+export class RoomStore {
   private state: RoomState = {
     room: null,
     participantId: null,
     error: null,
-    isLoading: false
+    isLoading: false,
+    guesses: []
   };
 
   private listeners = new Set<Listener>();
@@ -107,6 +110,54 @@ class RoomStore {
     );
     this.setRoomSnapshot(response.room);
     return response.room;
+  }
+
+  async fetchGuesses() {
+    if (!this.state.room) return [];
+    const { guesses } = await api.fetchGuesses(this.state.room.code);
+    this.setState({ guesses: guesses ?? [] });
+    return guesses ?? [];
+  }
+
+  startGuessPolling(intervalMs = 2000) {
+    if (this._poller) return;
+    this._poller = createPoller(() => this.fetchGuesses(), intervalMs, 400);
+    this._poller.start();
+  }
+
+  stopGuessPolling() {
+    if (this._poller) {
+      this._poller.stop();
+      this._poller = undefined;
+    }
+  }
+
+  private _poller: ReturnType<typeof createPoller> | undefined;
+
+  private _snapshotPoller: ReturnType<typeof createPoller> | undefined;
+
+  startSnapshotPolling(intervalMs = 2000) {
+    if (this._snapshotPoller) return;
+    this._snapshotPoller = createPoller(
+      async () => {
+        if (!this.state.room) return;
+        try {
+          await this.fetchRoom();
+        } catch (e) {
+          // swallow - poller is best-effort
+        }
+      },
+      intervalMs,
+      400
+    );
+    this._snapshotPoller.start();
+  }
+
+  stopSnapshotPolling() {
+    if (this._snapshotPoller) {
+      this._snapshotPoller.stop();
+      this._snapshotPoller = undefined;
+    }
   }
 
   async startRoom() {

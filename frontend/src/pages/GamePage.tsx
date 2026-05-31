@@ -5,17 +5,40 @@ import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
+import { GuessList } from "../components/GuessList";
+import DrawerCanvas from "../components/DrawerCanvas";
 
 export function GamePage() {
   const navigate = useNavigate();
   const { room, participantId } = useRoomState();
+  const store = useRoomStore();
 
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
     }
   }, [navigate, room]);
+
+  useEffect(() => {
+    if (room) {
+      if (typeof (store as any).startGuessPolling === "function") {
+        (store as any).startGuessPolling();
+      }
+      if (typeof (store as any).startSnapshotPolling === "function") {
+        (store as any).startSnapshotPolling();
+      }
+      return () => {
+        if (typeof (store as any).stopGuessPolling === "function") {
+          (store as any).stopGuessPolling();
+        }
+        if (typeof (store as any).stopSnapshotPolling === "function") {
+          (store as any).stopSnapshotPolling();
+        }
+      };
+    }
+    return undefined;
+  }, [room?.code]);
 
   if (!room) {
     return null;
@@ -44,16 +67,7 @@ export function GamePage() {
 
         <div className="game-page__main">
           <Card title="Canvas">
-            <div
-              className="canvas-placeholder"
-              style={{
-                minHeight: "500px",
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb"
-              }}
-            >
-              Waiting for drawer...
-            </div>
+            <DrawerCanvas />
           </Card>
         </div>
 
@@ -82,7 +96,13 @@ export function GamePage() {
           )}
 
           <Card title="Your Guess">
-            <GuessForm />
+            <GuessForm
+              roomCode={room.code}
+              participantId={participantId ?? undefined}
+            />
+            <div style={{ marginTop: 12 }}>
+              <GuessList />
+            </div>
           </Card>
         </aside>
       </div>

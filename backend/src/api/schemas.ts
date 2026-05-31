@@ -29,6 +29,19 @@ export const startRoomSchema = z.object({
   participantId: z.string()
 });
 
+export const guessPayloadSchema = z.object({
+  participantId: z.string(),
+  text: z.string()
+});
+
+export const canvasEventSchema = z.object({
+  participantId: z.string(),
+  event: z.object({
+    type: z.enum(["draw", "clear"]),
+    payload: z.any().optional()
+  })
+});
+
 export class HttpError extends Error {
   statusCode: number;
   code?: string;
@@ -42,3 +55,5 @@ export class HttpError extends Error {
 
 export const ERR_NAME_REQUIRED = "ERR_NAME_REQUIRED";
 export const ERR_NO_WORDS = "ERR_NO_WORDS";
+export const ERR_GUESS_REQUIRED = "ERR_GUESS_REQUIRED";
+export const ERR_GUESS_TOO_LONG = "ERR_GUESS_TOO_LONG";

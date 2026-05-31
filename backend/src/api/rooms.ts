@@ -3,6 +3,10 @@ import {
   createRoomSchema,
   HttpError,
   joinRoomSchema,
+  guessPayloadSchema,
+  canvasEventSchema,
+  ERR_GUESS_REQUIRED,
+  ERR_GUESS_TOO_LONG,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
   startRoomSchema
@@ -12,7 +16,10 @@ import {
   getRoom,
   joinRoom,
   toRoomSnapshot,
-  startGame
+  startGame,
+  submitGuess,
+  getGuesses,
+  appendCanvasEvent
 } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
@@ -143,6 +150,79 @@ export function createRoomsRouter() {
       }
 
       response.json({ secretWord: room.secretWord });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST a guess: validate, score, and persist
+  router.post("/:code/guesses", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, text } = guessPayloadSchema.parse(request.body);
+
+      const trimmed = text === undefined ? "" : text.trim();
+      if (!trimmed) {
+        throw new HttpError(400, "Please enter a guess.", ERR_GUESS_REQUIRED);
+      }
+
+      if (trimmed.length > 200) {
+        throw new HttpError(400, "Guess too long.", ERR_GUESS_TOO_LONG);
+      }
+
+      const result = submitGuess(code.toUpperCase(), participantId, trimmed);
+
+      if ((result as any).reason === "not-found") {
+        throw new HttpError(404, "Unable to find room");
+      }
+
+      if ((result as any).reason === "not-in-game") {
+        throw new HttpError(409, "Game not in progress");
+      }
+
+      response.status(201).json({ guess: (result as any).guess });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET guess history
+  router.get("/:code/guesses", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const guesses = getGuesses(code.toUpperCase());
+      if (guesses === null) {
+        throw new HttpError(404, "Unable to find room");
+      }
+      response.json({ guesses });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST canvas event (drawer only)
+  router.post("/:code/canvas-events", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, event } = canvasEventSchema.parse(request.body);
+
+      const canvasEvent = { ...event, timestamp: new Date().toISOString() };
+
+      const result = appendCanvasEvent(
+        code.toUpperCase(),
+        participantId,
+        canvasEvent as any
+      );
+
+      if ((result as any).reason === "not-found") {
+        throw new HttpError(404, "Unable to find room");
+      }
+
+      if ((result as any).reason === "not-authorized") {
+        throw new HttpError(403, "Only the drawer may post canvas events");
+      }
+
+      response.status(201).json({ ok: true });
     } catch (error) {
       next(error);
     }
