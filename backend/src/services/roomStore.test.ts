@@ -45,4 +45,28 @@ describe("roomStore", () => {
     const persisted = getRoom(created.room.code);
     expect(persisted?.status).toBe("in-game");
   });
+
+  it("trims player names on create and join", () => {
+    const created = createRoom("  Alice  ");
+    expect(created.room.participants[0].name).toBe("Alice");
+
+    const joinRes = joinRoom(created.room.code, "  Bob  ");
+    if (joinRes === null) throw new Error("Join failed in test");
+    expect(
+      (joinRes as any).room.participants.some((p: any) => p.name === "Bob")
+    ).toBe(true);
+  });
+
+  it("assigns drawer and secret word when starting game", () => {
+    const created = createRoom("Host");
+    const joinRes = joinRoom(created.room.code, "Guest");
+    if (joinRes === null) throw new Error("Join failed in test");
+
+    const hostStart = startGame(created.room.code, created.participantId);
+    expect((hostStart as any).room).toBeDefined();
+    const persisted = getRoom(created.room.code);
+    expect(persisted?.status).toBe("in-game");
+    expect(persisted?.drawerId).toBeDefined();
+    expect(persisted?.secretWord).toBeDefined();
+  });
 });

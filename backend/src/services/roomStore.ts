@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import type { Participant, Room, RoomSnapshot } from "../models/game.js";
 import { STARTER_ROLES, STARTER_WORDS } from "../seed/starterData.js";
 
@@ -36,7 +36,9 @@ function generateUniqueCode() {
 }
 
 function displayName(name?: string) {
-  return name || "Player";
+  if (name === undefined) return "Player";
+  const trimmed = name.trim();
+  return trimmed.length > 0 ? trimmed : "Player";
 }
 
 function createParticipant(name?: string, role?: string): Participant {
@@ -63,6 +65,7 @@ export function createRoom(playerName?: string) {
     status: "lobby",
     participants: [participant],
     hostId: participant.id,
+    seed: randomUUID(),
     createdAt: now(),
     updatedAt: now()
   };
@@ -121,9 +124,7 @@ export function toRoomSnapshot(
   room: Room,
   viewerParticipantId?: string
 ): RoomSnapshot {
-  void viewerParticipantId;
-
-  return {
+  const snapshot: RoomSnapshot = {
     code: room.code,
     status: room.status,
     hostId: room.hostId,
@@ -131,6 +132,25 @@ export function toRoomSnapshot(
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };
+
+  // Only include the secret word when the viewer is the drawer
+  if (
+    viewerParticipantId &&
+    room.drawerId &&
+    viewerParticipantId === room.drawerId
+  ) {
+    snapshot.secretWord = room.secretWord;
+  }
+
+  return snapshot;
+}
+
+function selectWord(seed: string | undefined, roundIndex: number) {
+  const words = STARTER_WORDS;
+  if (!seed) return words[0];
+  const hash = createHash("sha256").update(`${seed}:${roundIndex}`).digest();
+  const idx = hash.readUInt32BE(0) % words.length;
+  return words[idx];
 }
 
 export function startGame(code: string, participantId: string) {
@@ -152,7 +172,18 @@ export function startGame(code: string, participantId: string) {
     return { reason: "already-in-game" } as const;
   }
 
+  // initialize the first round
   room.status = "in-game";
+  room.roundIndex = 1;
+
+  // choose drawer: prefer host if present, otherwise first participant by join order
+  let drawerId = room.hostId;
+  if (!drawerId || !room.participants.some((p) => p.id === drawerId)) {
+    drawerId = room.participants[0]?.id;
+  }
+
+  room.drawerId = drawerId;
+  room.secretWord = selectWord(room.seed, room.roundIndex);
   room.updatedAt = now();
   rooms.set(room.code, room);
 
