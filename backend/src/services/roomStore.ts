@@ -134,6 +134,41 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+export function restartRoom(code: string, participantId: string) {
+  const room = rooms.get(code);
+  if (!room) return { reason: "not-found" } as const;
+  if (room.hostId !== participantId) return { reason: "not-host" } as const;
+
+  // capture summary for the last round
+  const finalScores = room.participants.map((p) => ({
+    participantId: p.id,
+    score: (p as any).score as number | undefined
+  }));
+
+  room.lastRoundSummary = {
+    word: room.secretWord,
+    drawerId: room.drawerId,
+    finalScores,
+    guesses: room.guesses ? [...room.guesses] : [],
+    endedAt: now()
+  };
+
+  // clear transient per-round state but preserve participants and host
+  delete room.secretWord;
+  delete room.drawerId;
+  room.guesses = [];
+  room.canvasEvents = [];
+  room.status = "lobby";
+  room.roundIndex = undefined;
+
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  console.info(`[roomStore] restartRoom code=${room.code} by=${participantId}`);
+
+  return { room: cloneRoom(room) } as const;
+}
+
 export function toRoomSnapshot(
   room: Room,
   viewerParticipantId?: string

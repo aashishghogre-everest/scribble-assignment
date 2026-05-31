@@ -26,6 +26,19 @@ export interface RoomSessionResponse {
   room: RoomSnapshot;
 }
 
+export interface RoundSummary {
+  word?: string;
+  drawerId?: string;
+  finalScores?: Array<{ participantId: string; score?: number }>;
+  guesses?: Array<{
+    playerId: string;
+    textTrimmed: string;
+    timestamp: string;
+    isCorrect: boolean;
+  }>;
+  endedAt?: string;
+}
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3001/bug";
 
@@ -110,6 +123,11 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ participantId, event })
       }
+    );
+  },
+  getLastRoundSummary(code: string) {
+    return request<{ lastRoundSummary: RoundSummary | null }>(
+      `/rooms/${encodeURIComponent(code)}/last-round-summary`
     );
   }
 };

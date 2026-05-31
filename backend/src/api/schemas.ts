@@ -42,6 +42,32 @@ export const canvasEventSchema = z.object({
   })
 });
 
+// Round summary schema returned by the API
+export const roundSummarySchema = z.object({
+  word: z.string().optional(),
+  drawerId: z.string().optional(),
+  finalScores: z
+    .array(
+      z.object({ participantId: z.string(), score: z.number().optional() })
+    )
+    .optional(),
+  guesses: z
+    .array(
+      z.object({
+        playerId: z.string(),
+        textTrimmed: z.string(),
+        timestamp: z.string(),
+        isCorrect: z.boolean()
+      })
+    )
+    .optional(),
+  endedAt: z.string().optional()
+});
+
+export const restartRoomSchema = z.object({
+  participantId: z.string()
+});
+
 export class HttpError extends Error {
   statusCode: number;
   code?: string;
