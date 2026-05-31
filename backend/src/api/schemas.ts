@@ -31,9 +31,14 @@ export const startRoomSchema = z.object({
 
 export class HttpError extends Error {
   statusCode: number;
+  code?: string;
 
-  constructor(statusCode: number, message: string) {
+  constructor(statusCode: number, message: string, code?: string) {
     super(message);
     this.statusCode = statusCode;
+    this.code = code;
   }
 }
+
+export const ERR_NAME_REQUIRED = "ERR_NAME_REQUIRED";
+export const ERR_NO_WORDS = "ERR_NO_WORDS";

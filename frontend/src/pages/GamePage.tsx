@@ -21,7 +21,10 @@ export function GamePage() {
     return null;
   }
 
-  const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
+  const viewer =
+    room.participants.find((participant) => participant.id === participantId) ??
+    null;
+  const drawer = room.participants.find((p) => p.id === room.drawerId) ?? null;
 
   return (
     <section className="panel game-page">
@@ -41,7 +44,14 @@ export function GamePage() {
 
         <div className="game-page__main">
           <Card title="Canvas">
-            <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+            <div
+              className="canvas-placeholder"
+              style={{
+                minHeight: "500px",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb"
+              }}
+            >
               Waiting for drawer...
             </div>
           </Card>
@@ -55,11 +65,21 @@ export function GamePage() {
                 <dd>{viewer?.name ?? "Unknown player"}</dd>
               </div>
               <div>
+                <dt>Drawer</dt>
+                <dd>{drawer ? drawer.name : "TBD"}</dd>
+              </div>
+              <div>
                 <dt>Status</dt>
                 <dd>Playing</dd>
               </div>
             </dl>
           </Card>
+
+          {room.secretWord && (
+            <Card title="Secret Word">
+              <div className="secret-word">{room.secretWord}</div>
+            </Card>
+          )}
 
           <Card title="Your Guess">
             <GuessForm />
@@ -68,7 +88,10 @@ export function GamePage() {
       </div>
 
       <div className="button-row">
-        <button className="button button--secondary" onClick={() => navigate("/lobby")}>
+        <button
+          className="button button--secondary"
+          onClick={() => navigate("/lobby")}
+        >
           Exit Game
         </button>
       </div>

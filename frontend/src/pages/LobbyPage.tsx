@@ -20,7 +20,6 @@ export function LobbyPage() {
 
   useEffect(() => {
     if (!room) return;
-
     const poller = createPoller(() => roomStore.fetchRoom(), 2000, 500);
     poller.start();
 
@@ -28,6 +27,15 @@ export function LobbyPage() {
       poller.stop();
     };
   }, [room, roomStore]);
+
+  // If the room status changes to in-game (started by host), navigate all
+  // participants to the GamePage so they see the active round.
+  useEffect(() => {
+    if (!room) return;
+    if (room.status === "in-game") {
+      navigate("/game");
+    }
+  }, [room, navigate]);
 
   async function handleRefresh() {
     try {
@@ -109,6 +117,15 @@ export function LobbyPage() {
               await roomStore.startRoom();
               navigate("/game");
             } catch (err) {
+              // Surface friendly message for missing starter words
+              const code = (err as any)?.code;
+              if (code === "ERR_NO_WORDS") {
+                setRefreshError(
+                  "Cannot start game: no starter words configured."
+                );
+                return;
+              }
+
               setRefreshError(
                 err instanceof Error ? err.message : "Unable to start game"
               );

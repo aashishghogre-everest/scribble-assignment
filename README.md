@@ -113,6 +113,44 @@ Client polling and TTL
 
 The backend stores all room data in memory only. Restarting the backend clears all rooms.
 
+## Deterministic Word Selection
+
+To make round behavior reproducible for tests and debugging, the server selects
+the secret word deterministically from the configured starter list using an
+HMAC-SHA256 based algorithm.
+
+Algorithm summary:
+
+- Input: `seed` (string), `roundIndex` (non-negative integer), `starterWordList` (non-empty array of strings)
+- Compute HMAC-SHA256 using `seed` as the key and `String(roundIndex)` as the message
+- Interpret the resulting 32-byte digest as a big-endian unsigned integer `N`
+- Compute `index = Number(N % BigInt(starterWordList.length))`
+- Selected word is `starterWordList[index]`
+
+This approach avoids platform-specific RNG differences and makes the word
+selection auditable in tests and logs.
+
+Example test vectors
+
+For seed `test-seed-123` and list `["apple","banana","cherry"]` the
+deterministic outputs are:
+
+- roundIndex 0 → `cherry`
+- roundIndex 1 → `banana`
+- roundIndex 2 → `apple`
+
+You can reproduce these values locally with node (from the `backend` folder):
+
+```bash
+node -e "const crypto=require('crypto'); const seed='test-seed-123'; const list=['apple','banana','cherry']; [0,1,2].forEach(i=>{const h=crypto.createHmac('sha256',seed).update(String(i)).digest(); const N=BigInt('0x'+h.toString('hex')); const idx=Number(N%BigInt(list.length)); console.log(i+':', list[idx]);});"
+```
+
+Recommended regression test
+
+- Add a unit test in `backend/src/services/wordSelector.test.ts` asserting
+  known outputs for a short list and seed (see vectors above). This prevents
+  accidental algorithm regressions.
+
 ## Run The Backend
 
 ```bash
