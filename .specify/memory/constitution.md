@@ -68,17 +68,15 @@ changes require a migration plan and a MAJOR version bump.
 - Tech stack: TypeScript, Node.js (backend), Express, Zod, React + Vite (frontend)
 - No authentication mechanisms are to be added (NO JWTs, sessions, or OAuth)
 - No external databases, queues, or message buses
-- Use `vitest` for tests; CI must run tests before merge
+- Use `vitest` for tests; CI/CD is out of scope for the current phase — tests and linting should be run locally before merging.
 - Document polling intervals and API contract examples in `docs/` or README
 
 ## Development Workflow
 
-- Branching: feature branches named `feature/short-desc` or follow repository
-  conventions. Commit messages SHOULD be clear and reference issues when present.
-- Pull Requests: must include a description, testing notes, and link to any
-  relevant contracts. Two reviewers are recommended for major changes.
-- Quality Gates: CI MUST run linting and tests. New code must include unit tests
-  and relevant contract/integration tests where applicable.
+- Branching: Use per-feature branches for development. Branch names SHOULD follow the spec-tooling conventions using either a numeric prefix or timestamp prefix, for example `001-frontend-env-config` or `20260531-143022-feature-name`. Matching the branch prefix to the spec directory enables the spec tooling to automatically resolve `FEATURE_DIR` and related artifacts.
+- Commit messages SHOULD be clear and reference issues when present.
+- Pull Requests: must include a description, testing notes, and link to any relevant contracts. Two reviewers are recommended for major changes.
+- Quality Gates: Tests and linting are required and should be executed locally before merge; CI/CD automation is out of scope for this phase.
 
 ## Governance
 
