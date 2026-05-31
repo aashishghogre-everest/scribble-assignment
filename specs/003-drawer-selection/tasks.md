@@ -1,6 +1,12 @@
 ---
-description: "Tasks for Drawer Selection & Word Visibility feature"
+description: "Tasks for Drawer Selection & Word Visibility"
 ---
+
+# Tasks: Drawer Selection & Word Visibility
+
+---
+
+## description: "Tasks for Drawer Selection & Word Visibility"
 
 # Tasks: Drawer Selection & Word Visibility
 
@@ -8,77 +14,102 @@ description: "Tasks for Drawer Selection & Word Visibility feature"
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 [P] Ensure feature docs exist and reference paths in specs/003-drawer-selection/
-- [ ] T002 [P] Update frontend input trimming/validation util in frontend/src/utils/validation.ts and tests in frontend/src/utils/validation.test.ts
-- [ ] T003 [P] Add/verify server-side Zod schema for player `displayName` trimming and non-empty validation in backend/src/api/schemas.ts and tests in backend/src/api/schemas.test.ts
+- [ ] T1 [P] Ensure feature docs exist and reference paths in `specs/003-drawer-selection/` (FR-006)
+- [ ] T2 [P] Verify `vitest` configuration in `backend/vitest.config.ts` and `frontend/vitest.config.ts` (Test-First)
+- [ ] T3 [P] Add test helpers for integration tests: `backend/tests/helpers/setupTestServer.ts` (Test-First)
+- [ ] T4 [P] Consolidate starter words to `backend/seed/starterData.ts` (reuse existing file) (FR-005)
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Update `Player` and `Room` types to include `displayName` (trimmed), `joinOrder`, `isHost`, `seed`, and `starterWordList` in backend/src/models/game.ts
-- [ ] T005 [P] Implement deterministic word selector util in backend/src/services/wordSelector.ts and unit tests in backend/src/services/wordSelector.test.ts (seed + round index)
-- [ ] T006 Implement room-level checks and prevention of round start when `starterWordList` is empty in backend/src/services/roomStore.ts and tests in backend/src/services/roomStore.test.ts
-- [ ] T007 Implement `startRound` server endpoint and access controls in backend/src/api/rooms.ts so drawer assignment (host or first-join) and secret-word retrieval (drawer-only) are enforced; add/extend integration tests in backend/src/api/rooms.test.ts
+- [ ] T5 Update `Player` and `Room` types to include `displayName` (trimmed), `joinOrder`, `isHost`, `seed`, and `starterWordList` in `backend/src/models/game.ts` (FR-001, FR-004)
+- [ ] T6 [P] Add server-side Zod schemas and tests in `backend/src/api/schemas.ts` / `backend/src/api/schemas.test.ts` to trim and validate `displayName` (FR-001)
+- [ ] T7 Implement `startRound` and `assignDrawerForFirstRound` helpers in `backend/src/services/roomStore.ts` (FR-002, FR-003)
+- [ ] T8 [P] Implement drawer-only access control helper for `secretWord` retrieval in `backend/src/services/roomStore.ts` (FR-003)
+- [ ] T9 Add integration test scaffolding in `backend/src/api/rooms.test.ts` for round flow (Test-First)
 
 ---
 
-## Phase 3: User Story 1 - Start Round Drawer Assignment (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - Start Round Drawer Assignment (Priority: P1)
 
-**Goal**: Assign the drawer to the host (or first-joined player if host missing) and ensure only the drawer sees the secret word.
+**Goal**: Assign drawer for first round to host or first joined player; only drawer sees `secretWord`.
 
-**Independent Test**: Create a room with N players, start the first round, and assert the drawer identity is set and only the drawer receives the secret word.
+### Tests (Test-First)
 
-- [ ] T008 [US1] Update backend logic to set `Round.drawerPlayerId` when `startRound` is invoked in backend/src/services/roomStore.ts and persist `startedAt` in backend/src/models/game.ts
-- [ ] T009 [US1] Add integration test that simulates: host starts round → host client receives secret word; non-drawers do not, in backend/src/api/rooms.test.ts
-- [ ] T010 [US1] Update frontend `GamePage` to display `Drawer: <name>` to all players and display the secret word only on the drawer's client in frontend/src/pages/GamePage.tsx
+- [ ] T10 [P][US1] Integration: `backend/src/api/rooms.round-start.test.ts` — host starts round, host receives `secretWord`, non-drawers do not (FR-002, FR-003)
+- [ ] T11 [P][US1] Unit: `backend/src/services/roomStore.test.ts` for `assignDrawerForFirstRound` (FR-002)
+
+### Implementation
+
+- [ ] T12 [US1] Implement `assignDrawerForFirstRound` in `backend/src/services/roomStore.ts` (depends on T5, T6) (FR-002)
+- [ ] T13 [US1] Add `POST /rooms/:roomId/start` endpoint in `backend/src/api/rooms.ts` (FR-002, FR-003)
+- [ ] T14 [US1] Add `GET /rooms/:roomId/secret-word` endpoint enforcing drawer-only access in `backend/src/api/rooms.ts` (FR-003)
+- [ ] T15 [US1] Update frontend `GamePage` to display `Drawer: <name>` and show `secretWord` only for drawer in `frontend/src/pages/GamePage.tsx` (FR-006)
+- [ ] T16 [US1] Frontend test: `frontend/src/pages/GamePage.test.tsx` for drawer UI and visibility (FR-006)
 
 ---
 
 ## Phase 4: User Story 2 - Player Name Validation (Priority: P1)
 
-**Goal**: Enforce trimming and non-empty display names on client and server; show inline validation message when rejected.
+**Goal**: Trim and validate `displayName` on client and server; reject whitespace-only names.
 
-**Independent Test**: Attempt to join with names: "Alice", " ", " Bob " — whitespace-only rejected, others trimmed and accepted.
+### Tests (Test-First)
 
-- [ ] T011 [US2] Update `JoinRoomPage` and `CreateRoomPage` to trim input and show validation message in frontend/src/pages/JoinRoomPage.tsx and frontend/src/pages/CreateRoomPage.tsx
-- [ ] T012 [US2] Add frontend unit tests for trimmed acceptance and whitespace rejection in frontend/src/pages/LobbyPage.test.tsx or a new test file frontend/src/pages/validation.test.tsx
+- [ ] T17 [P][US2] Frontend unit: `frontend/src/utils/validation.test.ts` (FR-001)
+- [ ] T18 [P][US2] Backend unit: `backend/src/api/schemas.test.ts` (FR-001)
+
+### Implementation
+
+- [ ] T19 [US2] Implement client trimming and inline validation in `frontend/src/pages/JoinRoomPage.tsx` and `CreateRoomPage.tsx` (FR-001)
+- [ ] T20 [US2] Ensure server trims and validates `displayName` in `backend/src/api/schemas.ts` and `backend/src/api/rooms.ts` (FR-001)
+- [ ] T21 [US2] Standardize validation error code `ERR_NAME_REQUIRED` and message mapping for UI tests (FR-001)
 
 ---
 
 ## Phase 5: User Story 3 - Deterministic Secret Word Selection (Priority: P2)
 
-**Goal**: Provide deterministic secret-word selection using room `seed` and round index.
+**Goal**: Select `secretWord` deterministically using `room.seed` + `round.index`.
 
-**Independent Test**: For a given seed and round index, selection returns expected word.
+### Tests (Test-First)
 
-- [ ] T013 [US3] Add unit test asserting deterministic selection for a known seed/round in backend/src/services/wordSelector.test.ts
+- [ ] T22 [P][US3] Unit: `backend/src/services/wordSelector.test.ts` with known seed→word vectors (FR-004)
+
+### Implementation
+
+- [ ] T23 [US3] Implement deterministic word selector util `backend/src/services/wordSelector.ts` (pure function: `(seed, roundIndex, list) => word`) and document algorithm (FR-004)
+- [ ] T24 [US3] Integrate selector into `startRound` flow in `backend/src/services/roomStore.ts` so `secretWord` is set server-side (FR-004)
+- [ ] T25 [US3] Prevent round start when `starterWordList` is empty and return clear error code `ERR_NO_WORDS` from `backend/src/api/rooms.ts` (FR-005)
 
 ---
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T014 [P] Surface server-side error to frontend when starter word list is empty; show user-friendly message in frontend/src/pages/LobbyPage.tsx
-- [ ] T015 [P] Update documentation: add quickstart and testing notes in specs/003-drawer-selection/quickstart.md and update README.md if needed
-- [ ] T016 [P] Code cleanup and add comments where algorithms (deterministic selection) are non-obvious in backend/src/services/wordSelector.ts
+- [ ] T26 [P] Surface server-side error to frontend when starter word list is empty; show user-friendly message in `frontend/src/pages/LobbyPage.tsx` (FR-005)
+- [ ] T27 [P] Update documentation: `specs/003-drawer-selection/quickstart.md` and update `README.md` (polish)
+- [ ] T28 [P] Run lint/format and code cleanup across modified files
 
 ---
 
 ## Dependencies & Execution Order
 
 - Phase 1 (Setup) → Phase 2 (Foundational) → Phase 3+ (User Stories) → Polish
-- Tests: add unit tests (wordSelector, schemas) before implementation where feasible
-
-## Parallel Opportunities
-
-- `T002`, `T003`, `T005`, and `T014` marked `[P]` can be worked on in parallel safely
-- After Foundational phase completes, US1/US2/US3 tasks can be worked on in parallel
-
-## Implementation Strategy
-
-- MVP: Complete Phase 1 + Phase 2 + Phase 3 (User Story 1) to have a runnable first-round experience
+- Tests: add unit tests before implementation where feasible (Test-First)
 
 ---
+
+## Requirement→Task Mapping (Coverage)
+
+- FR-001: T6, T17–T21
+- FR-002: T7, T10–T13
+- FR-003: T7, T8, T10, T14, T24
+- FR-004: T5, T22–T24
+- FR-005: T4, T6, T25, T26
+- FR-006: T1, T15, T16
+
+---
+
+Generated and consolidated by speckit.tasks
 
 ## Checklist Notes
 

@@ -1,6 +1,7 @@
 # Plan: Drawer & Guess Sync
 
 ## Goal
+
 Implement guess submission, validation, scoring, and polling-based synchronization so guess history is consistent across players and drawer canvas state persists for the drawer.
 
 ## High-level Steps

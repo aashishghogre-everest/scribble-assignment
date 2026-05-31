@@ -1,6 +1,6 @@
 # Implementation Plan: Drawer Selection & Word Visibility
 
-**Branch**: `004-drawer-guess-sync` | **Date**: 2026-05-31 | **Spec**: specs/003-drawer-selection/spec.md
+**Branch**: `003-drawer-selection` | **Date**: 2026-05-31 | **Spec**: specs/003-drawer-selection/spec.md
 
 **Input**: Feature specification from `/specs/003-drawer-selection/spec.md`
 
@@ -27,6 +27,34 @@ Assign the drawer for the first round to the host (or the first joined player if
 **Constraints**: Follow repository constitution: TypeScript-first, Zod for validation, HTTP polling only (no WebSockets), in-memory state only, tests required via `vitest`.
 
 **Scale/Scope**: Small feature scoped to game room lifecycle and round start logic; affects backend room/round models and frontend `GamePage` display.
+
+## Deterministic Word Selection (Algorithm)
+
+To ensure reproducible secret-word selection for tests and debugging, implement a deterministic selector with the following specification:
+
+- Input: `seed` (string), `roundIndex` (non-negative integer), `starterWordList` (array of strings)
+- Algorithm: compute HMAC-SHA256 using `seed` as the key and the ASCII decimal representation of `roundIndex` as the message. Interpret the resulting 32-byte digest as a big-endian unsigned integer `N`. Select index `i = N mod starterWordList.length` and return `starterWordList[i]` as the `secretWord`.
+- Implementation notes: use Node's built-in `crypto` module for server code:
+
+```ts
+import { createHmac } from "crypto";
+
+function selectDeterministicWord(
+  seed: string,
+  roundIndex: number,
+  list: string[]
+) {
+  const h = createHmac("sha256", seed).update(String(roundIndex)).digest();
+  // Interpret as big-endian unsigned integer (use BigInt) and mod by list.length
+  const N = BigInt("0x" + h.toString("hex"));
+  const idx = Number(N % BigInt(list.length));
+  return list[idx];
+}
+```
+
+- Test vectors: include unit tests that assert known outputs for fixed `seed`, `roundIndex`, and `starterWordList` values. Example test case should include a short starter list (3–10 items) with a deterministic expected result to catch implementation regressions.
+
+Rationale: HMAC-SHA256 with the room seed as key avoids endianness or platform-specific RNG differences and provides stable, auditable selection. Using `roundIndex` as the message ensures different rounds select different offsets for the same seed.
 
 ## Constitution Check
 
