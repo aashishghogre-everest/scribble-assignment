@@ -1,50 +1,95 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+
+Version change: [CONSTITUTION_VERSION] -> 1.0.0
+
+Modified principles:
+- [PRINCIPLE_1_NAME] -> TypeScript First
+- [PRINCIPLE_2_NAME] -> Test-First (TDD)
+- [PRINCIPLE_3_NAME] -> HTTP Polling Only (No WebSockets)
+- [PRINCIPLE_4_NAME] -> In-Memory Data Only (No Databases)
+- [PRINCIPLE_5_NAME] -> Observability & Versioning
+
+Added sections:
+- Additional Constraints
+- Development Workflow
+
+Removed sections:
+- none
+
+Templates requiring updates:
+- .specify/templates/plan-template.md ✅ updated
+- .specify/templates/spec-template.md ⚠ pending
+- .specify/templates/tasks-template.md ⚠ pending
+
+Follow-up TODOs:
+- Update spec & tasks templates to reference constitution constraints
+- Add ratification signatories or maintainers list if required
+-->
+
+# Scribble Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### TypeScript First (NON-NEGOTIABLE)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All production and test code MUST be written in TypeScript with strict typing enabled.
+Avoid `any`; prefer `unknown` where necessary. Backend request/response shapes MUST be
+validated with Zod. Rationale: Type safety reduces runtime bugs and matches existing
+repo patterns.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### Test-First (NON-NEGOTIABLE)
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+New features and bug fixes MUST be driven by tests. Unit and contract tests MUST be
+added alongside implementation using `vitest`. Tests should fail before the
+implementation step (red → green → refactor).
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### HTTP Polling Only (ENFORCED)
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Real-time push protocols are NOT PERMITTED. Do not add WebSockets, Socket.io, or any
+server push technology. Design APIs and clients to use HTTP polling patterns only.
+Rationale: Keeps server simple and aligns with existing constraints.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### In-Memory Data Only (ENFORCED)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+This project MUST NOT introduce external databases or persistent stores. All runtime
+state is in-memory; seed data MAY be used for local development. Add clear
+disclaimers in docs about non-persistence and restart behavior.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Observability & Versioning
+
+All services MUST emit structured logs (concise + searchable). API changes follow
+semantic versioning for public contracts: MAJOR for breaking changes, MINOR for
+backward-compatible features, PATCH for non-semantic edits and docs. Breaking
+changes require a migration plan and a MAJOR version bump.
+
+## Additional Constraints
+
+- Tech stack: TypeScript, Node.js (backend), Express, Zod, React + Vite (frontend)
+- No authentication mechanisms are to be added (NO JWTs, sessions, or OAuth)
+- No external databases, queues, or message buses
+- Use `vitest` for tests; CI must run tests before merge
+- Document polling intervals and API contract examples in `docs/` or README
+
+## Development Workflow
+
+- Branching: feature branches named `feature/short-desc` or follow repository
+  conventions. Commit messages SHOULD be clear and reference issues when present.
+- Pull Requests: must include a description, testing notes, and link to any
+  relevant contracts. Two reviewers are recommended for major changes.
+- Quality Gates: CI MUST run linting and tests. New code must include unit tests
+  and relevant contract/integration tests where applicable.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Amendments to this constitution require an authored PR that documents the change,
+the rationale, and any migration steps. Versioning policy:
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- PATCH: editorial clarifications, typos, non-semantic wording changes
+- MINOR: addition of a principle or materially expanded guidance
+- MAJOR: removal or redefinition of an existing principle (breaking governance)
+
+Changes to the constitution SHOULD include a `Sync Impact Report` summarizing
+templates or artifacts that need updates.
+
+**Version**: 1.0.0 | **Ratified**: 2026-05-31 | **Last Amended**: 2026-05-31
