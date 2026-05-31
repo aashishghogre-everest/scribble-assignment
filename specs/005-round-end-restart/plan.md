@@ -12,29 +12,17 @@
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+The feature will be implemented within the existing monorepo: a TypeScript/Node.js backend and a React+Vite TypeScript frontend. The following concrete technical choices align with repository defaults and the constitution.
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
-
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
-
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
-
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
-
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
-
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
-
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+- **Language/Version**: Node.js 18+ runtime, TypeScript 5.6.x (matches frontend `package.json`), ES Modules
+- **Primary Dependencies**: Backend: `express`, `zod`; Frontend: `react`, `react-dom`, `react-router-dom`, `vite` (see `frontend/package.json`)
+- **Storage**: In-memory room state only (no external databases) — `Room` objects held in process memory per constitution
+- **Testing**: `vitest` for unit and integration tests; React Testing Library for component tests; integration tests using test server helpers in `tests/` and `backend/src/api` integration tests
+- **Target Platform**: Node.js server for backend; modern browser for frontend (development: Chromium-based browsers)
+- **Project Type**: Web application (frontend + backend)
+- **Performance Goals**: Local dev responsiveness: lobby and ResultsPage render within 3s after restart on typical dev machine; timing integration test asserts <3s for cleared state in local environment
+- **Constraints**: No WebSockets or server push; strictly in-memory state; TypeScript-first with Zod validation for API contracts; Test-First development workflow
+- **Scale/Scope**: Intended for small-scale in-memory rooms in dev/test environments; production-grade scaling is out of scope for this feature
 
 ## Constitution Check
 

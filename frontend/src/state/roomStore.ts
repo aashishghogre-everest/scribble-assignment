@@ -79,8 +79,26 @@ export class RoomStore {
   }
 
   setRoomSnapshot(room: RoomSnapshot) {
+    // Merge participants when server snapshot may omit transient roster info
+    const mergedRoom = (() => {
+      if (!this.state.room) return room;
+      // if server returned no participants but we have an existing list, keep it
+      if (
+        (!room.participants || room.participants.length === 0) &&
+        this.state.room.participants &&
+        this.state.room.participants.length > 0
+      ) {
+        return {
+          ...room,
+          participants: this.state.room.participants
+        } as RoomSnapshot;
+      }
+      // otherwise prefer server snapshot
+      return room;
+    })();
+
     this.setState({
-      room,
+      room: mergedRoom,
       error: null
     });
   }

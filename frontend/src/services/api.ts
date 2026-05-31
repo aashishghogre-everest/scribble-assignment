@@ -63,6 +63,13 @@ async function request<T>(path: string, init?: RequestInit) {
     // attach HTTP status and machine code for the UI to provide friendlier feedback
     (err as any).status = response.status;
     (err as any).code = (errorBody as any).code;
+    // log for debugging
+    // eslint-disable-next-line no-console
+    console.error("API request failed", {
+      path,
+      status: response.status,
+      body: errorBody
+    });
     throw err;
   }
 

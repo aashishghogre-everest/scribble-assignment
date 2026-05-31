@@ -12,7 +12,7 @@
 
 ### User Story 1 - View Results and Persisted Players (Priority: P1)
 
-A hosted round has just ended and the results screen is displayed to all players.
+A hosted round has just ended and the ResultsPage is displayed to all players.
 
 **Why this priority**: This is the expected end-of-round experience and must be reliable for user satisfaction and scoring correctness.
 
@@ -20,15 +20,15 @@ A hosted round has just ended and the results screen is displayed to all players
 
 **Acceptance Scenarios**:
 
-1. **Given** a round has ended and the result view is visible, **When** the host performs a restart, **Then** all connected players are returned to the lobby and see the preserved player list (same players and order where applicable).
-2. **Given** a round has ended and the result view is visible, **When** the host performs a restart, **Then** the final correct word, each player's final score, and the full guess history for the concluded round remain viewable to players on the results screen before leaving the results and are persisted across the restart long enough for verification (i.e., until the lobby is shown).
+1. **Given** a round has ended and the ResultsPage is visible, **When** the host performs a restart, **Then** all connected players are returned to the lobby and see the preserved player list (same players and order where applicable).
+2. **Given** a round has ended and the ResultsPage is visible, **When** the host performs a restart, **Then** the final correct word, each player's final score, and the full guess history for the concluded round remain viewable to players on the ResultsPage prior to returning to the lobby; the ResultsPage data MUST persist until the lobby has rendered or for at least 5 seconds, whichever is longer.
 3. **Given** a host restart occurred, **When** players arrive in the lobby, **Then** the prior round state (current drawer, drawing canvas, active guesses, timers) is cleared and the next round starts fresh when the host initiates it.
 
 ---
 
 ### User Story 2 - Edge Connectivity and Rejoins (Priority: P2)
 
-Players that temporarily disconnected during results should be treated as preserved players when they rejoin before the lobby is fully rebuilt.
+Players that temporarily disconnected during the ResultsPage should be treated as preserved players when they rejoin before the lobby is fully rebuilt.
 
 **Independent Test**: Disconnect a player during results, restart host, then reconnect; verify player appears in lobby with prior score.
 
@@ -48,12 +48,11 @@ Players that temporarily disconnected during results should be treated as preser
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST provide a built results page that is shown after a round ends; the results page MUST clearly display the correct word, each player's final score, and the full guess history for that round.
-- **FR-002**: When the host initiates a restart while the results view is displayed, the system MUST return all players to the lobby and preserve the player roster and their final scores.
+- **FR-001**: The system MUST provide a built `ResultsPage` that is shown after a round ends; the `ResultsPage` MUST clearly display the correct word, each player's final score, and the full guess history for that round. The `ResultsPage` MUST include review affordances (timestamps on guesses, copyable entries where relevant) and meet basic accessibility requirements.
+- **FR-002**: When the host initiates a restart while the ResultsPage is displayed, the system MUST return all players to the lobby and preserve the player roster and their final scores.
 - **FR-003**: When the host restarts, the system MUST clear all transient round state (drawing canvas, active guesses, current drawer, timers) so the next round starts in a clean state.
-- **FR-004**: The results view MUST allow players to review the final correct word and the round's guess history before being returned to the lobby.
-- **FR-005**: If a player disconnected during results and reconnects before the lobby is rebuilt, the player MUST be treated as preserved and retain their score.
-- **FR-006**: The system MUST not carry forward any per-round secrets (e.g., who was drawer for next round) after restart.
+- **FR-004**: If a player disconnected during the ResultsPage and reconnects before the lobby is rebuilt, the player MUST be treated as preserved and retain their score.
+- **FR-005**: The system MUST not carry forward any per-round secrets (e.g., who was drawer for next round) after restart.
 
 ### Key Entities
 
@@ -65,10 +64,10 @@ Players that temporarily disconnected during results should be treated as preser
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% of players in test runs see the correct final word on the results view after a host restart in automated test scenarios.
+- **SC-001**: 100% of players in test runs see the correct final word on the ResultsPage after a host restart in automated test scenarios.
 - **SC-002**: 100% of players' final scores are preserved and visible in the lobby after host restart in automated tests.
-- **SC-003**: The full guess history for the concluded round is available on the results view for manual verification prior to returning to the lobby.
-- **SC-004**: After host restart, the room shows cleared round state (drawing canvas empty, no active drawer) and preserved player list within 3 seconds on a local dev environment.
+- **SC-003**: The full guess history for the concluded round is available on the ResultsPage for manual verification prior to returning to the lobby.
+- **SC-004**: After host restart, the room shows cleared round state (drawing canvas empty, no active drawer) and preserved player list within 3 seconds on a local dev environment. The ResultsPage data MUST persist until the lobby has rendered or for at least 5 seconds, whichever is longer.
 
 ## Assumptions
 
