@@ -16,6 +16,14 @@ export interface Room {
   status: RoomStatus;
   participants: Participant[];
   hostId?: string;
+  // deterministic seed used for word selection
+  seed?: string;
+  // current round index (1-based)
+  roundIndex?: number;
+  // id of the drawer for the active round
+  drawerId?: string;
+  // secret word for the active round (server-only)
+  secretWord?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +35,8 @@ export interface RoomSnapshot {
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
+  // secret word is present only for the drawer viewing their own room snapshot
+  secretWord?: string;
 }
 
 export interface RoomSessionResponse {

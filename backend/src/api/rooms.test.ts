@@ -101,4 +101,54 @@ describe("rooms API contracts", () => {
     expect(body.room.code).toBe(code);
     expect(Array.isArray(body.room.participants)).toBe(true);
   });
+
+  it("rejects whitespace-only player names on create/join", async () => {
+    const res = await fetch(`${baseUrl}/rooms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerName: "   " })
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("only drawer sees secret word in room snapshot", async () => {
+    // create and join
+    const createRes = await fetch(`${baseUrl}/rooms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerName: "Host3" })
+    });
+    const created = await createRes.json();
+    const code = created.room.code;
+
+    const joinRes = await fetch(`${baseUrl}/rooms/${code}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerName: "Guest2" })
+    });
+    const joined = await joinRes.json();
+
+    // start game as host
+    const startRes = await fetch(`${baseUrl}/rooms/${code}/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ participantId: created.participantId })
+    });
+    expect(startRes.status).toBe(200);
+
+    // guest snapshot should not include secretWord
+    const guestGet = await fetch(
+      `${baseUrl}/rooms/${code}?participantId=${joined.participantId}`
+    );
+    const guestBody = await guestGet.json();
+    expect(guestBody.room.secretWord).toBeUndefined();
+
+    // drawer snapshot should include secretWord
+    const drawerGet = await fetch(
+      `${baseUrl}/rooms/${code}?participantId=${created.participantId}`
+    );
+    const drawerBody = await drawerGet.json();
+    expect(drawerBody.room.secretWord).toBeDefined();
+  });
 });
