@@ -37,6 +37,8 @@ export interface Room {
   guesses?: Guess[];
   // immutable canvas events stored for drawer rehydration
   canvasEvents?: CanvasEvent[];
+  // summary of the last completed round (kept across restarts)
+  lastRoundSummary?: RoundSummary;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,6 +56,14 @@ export interface RoomSnapshot {
   secretWord?: string;
   // canvas events included for all viewers (read-only for non-drawers)
   canvasEvents?: CanvasEvent[];
+}
+
+export interface RoundSummary {
+  word?: string;
+  drawerId?: string;
+  finalScores?: Array<{ participantId: string; score?: number }>;
+  guesses?: Guess[];
+  endedAt?: string;
 }
 
 export interface RoomSessionResponse {

@@ -14,13 +14,13 @@
 
 **TEST-FIRST: Write tests first and ensure they FAIL before implementing.**
 
-- [ ] T004 [P] Add `lastRoundSummary` field to in-memory Room model: `backend/src/models/game.ts`
-- [ ] T005 [P] Add Zod schema for `RoundSummary` and export in `backend/src/api/schemas.ts`
-- [ ] T006 [P] [TEST] Add integration test asserting per-round secrets are cleared after restart: `backend/src/api/restart.secrets.test.ts`
-- [ ] T007 [P] Add unit/integration tests for new endpoints: `backend/src/api/restart.integration.test.ts`
-- [ ] T008 [P] Implement backend endpoint `GET /rooms/:code/last-round-summary` in `backend/src/api/rooms.ts`
-- [ ] T009 [P] Implement backend endpoint `POST /rooms/:code/restart` in `backend/src/api/rooms.ts` and ensure it clears transient round state while preserving room player roster
-- [ ] T010 [P] Add or update polling client helper to fetch `last-round-summary` in `frontend/src/services/api.ts`
+- [x] T004 [P] Add `lastRoundSummary` field to in-memory Room model: `backend/src/models/game.ts`
+- [x] T005 [P] Add Zod schema for `RoundSummary` and export in `backend/src/api/schemas.ts`
+- [x] T006 [P] [TEST] Add integration test asserting per-round secrets are cleared after restart: `backend/src/api/restart.secrets.test.ts`
+- [x] T007 [P] Add unit/integration tests for new endpoints: `backend/src/api/restart.integration.test.ts`
+- [x] T008 [P] Implement backend endpoint `GET /rooms/:code/last-round-summary` in `backend/src/api/rooms.ts`
+- [x] T009 [P] Implement backend endpoint `POST /rooms/:code/restart` in `backend/src/api/rooms.ts` and ensure it clears transient round state while preserving room player roster
+- [x] T010 [P] Add or update polling client helper to fetch `last-round-summary` in `frontend/src/services/api.ts`
 
 **Checkpoint**: Foundation complete — backend endpoints and models exist and are test-covered
 

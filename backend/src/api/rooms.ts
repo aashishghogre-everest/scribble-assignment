@@ -9,7 +9,8 @@ import {
   ERR_GUESS_TOO_LONG,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
-  startRoomSchema
+  startRoomSchema,
+  restartRoomSchema
 } from "./schemas.js";
 import {
   createRoom,
@@ -19,7 +20,8 @@ import {
   startGame,
   submitGuess,
   getGuesses,
-  appendCanvasEvent
+  appendCanvasEvent,
+  restartRoom
 } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
@@ -150,6 +152,47 @@ export function createRoomsRouter() {
       }
 
       response.json({ secretWord: room.secretWord });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET last-round-summary for a room
+  router.get("/:code/last-round-summary", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const room = getRoom(code.toUpperCase());
+
+      if (!room) {
+        throw new HttpError(404, "Unable to load room");
+      }
+
+      const summary = room.lastRoundSummary;
+      response.json({ lastRoundSummary: summary ?? null });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // POST restart endpoint — host may restart round and preserve participants
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartRoomSchema.parse(request.body);
+
+      const result = restartRoom(code.toUpperCase(), participantId);
+
+      if ((result as any).reason === "not-found") {
+        throw new HttpError(404, "Unable to find room");
+      }
+
+      if ((result as any).reason === "not-host") {
+        throw new HttpError(403, "Only the host can restart the room");
+      }
+
+      response.json({
+        room: toRoomSnapshot((result as any).room, participantId)
+      });
     } catch (error) {
       next(error);
     }
