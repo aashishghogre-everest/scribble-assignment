@@ -7,7 +7,11 @@ import {
   useSyncExternalStore,
   type PropsWithChildren
 } from "react";
-import { api, type RoomSessionResponse, type RoomSnapshot } from "../services/api";
+import {
+  api,
+  type RoomSessionResponse,
+  type RoomSnapshot
+} from "../services/api";
 
 export interface RoomState {
   room: RoomSnapshot | null;
@@ -54,7 +58,8 @@ class RoomStore {
     try {
       return await operation();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unexpected request failure";
+      const message =
+        error instanceof Error ? error.message : "Unexpected request failure";
       this.setState({ error: message });
       throw error;
     } finally {
@@ -84,7 +89,9 @@ class RoomStore {
   }
 
   async joinRoom(code: string, playerName: string) {
-    const response = await this.withLoading(() => api.joinRoom(code, playerName));
+    const response = await this.withLoading(() =>
+      api.joinRoom(code, playerName)
+    );
     this.setRoomSession(response);
     return response;
   }
@@ -94,7 +101,22 @@ class RoomStore {
       return null;
     }
 
-    const response = await api.fetchRoom(this.state.room.code, this.state.participantId ?? undefined);
+    const response = await api.fetchRoom(
+      this.state.room.code,
+      this.state.participantId ?? undefined
+    );
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
+  async startRoom() {
+    if (!this.state.room || !this.state.participantId) {
+      throw new Error("Missing room or participantId");
+    }
+
+    const response = await this.withLoading(() =>
+      api.startRoom(this.state.room!.code, this.state.participantId!)
+    );
     this.setRoomSnapshot(response.room);
     return response.room;
   }
@@ -111,7 +133,11 @@ export function RoomStoreProvider({ children }: PropsWithChildren) {
 
   useEffect(() => undefined, []);
 
-  return createElement(RoomStoreContext.Provider, { value: storeRef.current }, children);
+  return createElement(
+    RoomStoreContext.Provider,
+    { value: storeRef.current },
+    children
+  );
 }
 
 export function useRoomStore() {
@@ -126,5 +152,9 @@ export function useRoomStore() {
 
 export function useRoomState() {
   const store = useRoomStore();
-  return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
+  );
 }
