@@ -10,9 +10,13 @@ export interface RoomSnapshot {
   code: string;
   status: "lobby" | "in-game";
   hostId?: string;
+  // id of the drawer for the active round (if any)
+  drawerId?: string;
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
+  // secret word is present only for the drawer viewing their own room snapshot
+  secretWord?: string;
 }
 
 export interface RoomSessionResponse {
