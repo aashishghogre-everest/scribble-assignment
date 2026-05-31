@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, joinRoom } from "./roomStore.js";
+import { createRoom, joinRoom, getRoom, startGame } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 4-character uppercase code", () => {
@@ -15,5 +15,34 @@ describe("roomStore", () => {
     const result = joinRoom("ZZZZ", "Bob");
 
     expect(result).toBeNull();
+  });
+
+  it("startGame returns not-enough when fewer than 2 players", () => {
+    const created = createRoom("Host");
+
+    const result = startGame(created.room.code, created.participantId);
+
+    expect((result as any).reason).toBe("not-enough");
+  });
+
+  it("startGame enforces host-only and allows host to start when enough players", () => {
+    const created = createRoom("Host");
+    const joinRes = joinRoom(created.room.code, "Guest");
+
+    // Non-host cannot start
+    if (joinRes === null) throw new Error("Join failed in test");
+    const nonHostStart = startGame(
+      created.room.code,
+      (joinRes as any).participantId
+    );
+    expect((nonHostStart as any).reason).toBe("not-host");
+
+    // Host can start when >=2 players
+    const hostStart = startGame(created.room.code, created.participantId);
+    expect((hostStart as any).room).toBeDefined();
+    expect((hostStart as any).room.status).toBe("in-game");
+
+    const persisted = getRoom(created.room.code);
+    expect(persisted?.status).toBe("in-game");
   });
 });

@@ -10,14 +10,18 @@ describe("room code validation", () => {
 
   it("rejects codes with invalid characters", () => {
     expect(isValidRoomCode("A B#")).toBe(false);
-    expect(roomCodeErrorMessage("A B#")).toBe("Room code may only contain letters and numbers.");
+    expect(roomCodeErrorMessage("A B#")).toBe(
+      "Room code may only contain letters and numbers."
+    );
   });
 
   it("rejects codes with wrong length", () => {
     expect(isValidRoomCode("ABC")).toBe(false);
     expect(roomCodeErrorMessage("ABC")).toBe("Room code must be 4 characters.");
     expect(isValidRoomCode("ABCDE")).toBe(false);
-    expect(roomCodeErrorMessage("ABCDE")).toBe("Room code must be 4 characters.");
+    expect(roomCodeErrorMessage("ABCDE")).toBe(
+      "Room code must be 4 characters."
+    );
   });
 
   it("returns empty message for blank input", () => {

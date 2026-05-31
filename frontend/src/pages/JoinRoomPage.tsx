@@ -18,7 +18,10 @@ export function JoinRoomPage() {
     // Basic client-side validation for code format
     const code = roomCode.trim().toUpperCase();
     if (!isValidRoomCode(code)) {
-      setError(codeError || "Please enter a 4-character room code (letters and numbers)");
+      setError(
+        codeError ||
+          "Please enter a 4-character room code (letters and numbers)"
+      );
       return;
     }
 
