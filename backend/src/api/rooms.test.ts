@@ -150,5 +150,19 @@ describe("rooms API contracts", () => {
     );
     const drawerBody = await drawerGet.json();
     expect(drawerBody.room.secretWord).toBeDefined();
+
+    // drawer can fetch secret-word endpoint
+    const secretRes = await fetch(
+      `${baseUrl}/rooms/${code}/secret-word?participantId=${created.participantId}`
+    );
+    expect(secretRes.status).toBe(200);
+    const secretBody = await secretRes.json();
+    expect(secretBody.secretWord).toBeDefined();
+
+    // non-drawer cannot fetch secret-word
+    const guestSecret = await fetch(
+      `${baseUrl}/rooms/${code}/secret-word?participantId=${joined.participantId}`
+    );
+    expect(guestSecret.status).toBe(403);
   });
 });

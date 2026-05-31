@@ -27,7 +27,12 @@ export function JoinRoomPage() {
 
     try {
       setError(null);
-      await roomStore.joinRoom(code, playerName);
+      const name = playerName.trim();
+      if (!name) {
+        setError("Please enter a name.");
+        return;
+      }
+      await roomStore.joinRoom(code, name);
       navigate("/lobby");
     } catch (caughtError) {
       if (caughtError instanceof Error) {

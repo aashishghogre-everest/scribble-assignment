@@ -1,6 +1,8 @@
-import { randomUUID, createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { Participant, Room, RoomSnapshot } from "../models/game.js";
+import type { Guess, CanvasEvent } from "../models/game.js";
 import { STARTER_ROLES, STARTER_WORDS } from "../seed/starterData.js";
+import { selectDeterministicWord } from "./wordSelector.js";
 
 const rooms = new Map<string, Room>();
 
@@ -44,10 +46,13 @@ function displayName(name?: string) {
 function createParticipant(name?: string, role?: string): Participant {
   return {
     id: randomUUID(),
+    displayName: displayName(name),
     name: displayName(name),
     joinedAt: now(),
     role: role as any
-  };
+    // joinOrder and isHost will be set by the caller when the participant is
+    // added to a Room so the participant has context of the room state.
+  } as Participant;
 }
 
 function cloneRoom(room: Room) {
@@ -60,12 +65,18 @@ export function listWords() {
 
 export function createRoom(playerName?: string) {
   const participant = createParticipant(playerName, "host");
+  // first participant is joinOrder 0 and is host
+  participant.joinOrder = 0;
+  participant.isHost = true;
   const room: Room = {
     code: generateUniqueCode(),
     status: "lobby",
     participants: [participant],
     hostId: participant.id,
     seed: randomUUID(),
+    starterWordList: listWords(),
+    guesses: [],
+    canvasEvents: [],
     createdAt: now(),
     updatedAt: now()
   };
@@ -94,6 +105,9 @@ export function joinRoom(code: string, playerName?: string) {
   }
 
   const participant = createParticipant(playerName, "player");
+  // set joinOrder based on current participants length
+  participant.joinOrder = room.participants.length;
+  participant.isHost = false;
   room.participants.push(participant);
   room.updatedAt = now();
   rooms.set(room.code, room);
@@ -127,6 +141,7 @@ export function toRoomSnapshot(
   const snapshot: RoomSnapshot = {
     code: room.code,
     status: room.status,
+    drawerId: room.drawerId,
     hostId: room.hostId,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),
@@ -142,15 +157,89 @@ export function toRoomSnapshot(
     snapshot.secretWord = room.secretWord;
   }
 
+  // include canvas events for all viewers so non-drawers can see read-only updates
+  snapshot.canvasEvents = room.canvasEvents ? [...room.canvasEvents] : [];
+
   return snapshot;
 }
 
-function selectWord(seed: string | undefined, roundIndex: number) {
-  const words = STARTER_WORDS;
-  if (!seed) return words[0];
-  const hash = createHash("sha256").update(`${seed}:${roundIndex}`).digest();
-  const idx = hash.readUInt32BE(0) % words.length;
-  return words[idx];
+export function submitGuess(
+  code: string,
+  participantId: string,
+  rawText: string
+): { guess: Guess; updatedRoom?: Room } | { reason: string } {
+  const room = rooms.get(code);
+
+  if (!room) return { reason: "not-found" } as const;
+  if (room.status !== "in-game") return { reason: "not-in-game" } as const;
+
+  const textTrimmed = rawText.trim();
+  if (textTrimmed.length === 0) return { reason: "empty" } as const;
+  if (textTrimmed.length > 200) return { reason: "too-long" } as const;
+
+  const isCorrect =
+    !!room.secretWord &&
+    textTrimmed.toLowerCase() === room.secretWord.toLowerCase();
+
+  const guess: Guess = {
+    playerId: participantId,
+    textTrimmed,
+    timestamp: now(),
+    isCorrect
+  };
+
+  room.guesses = room.guesses ?? [];
+  room.guesses.push(guess);
+
+  // award points for correct guess
+  if (isCorrect) {
+    const participant = room.participants.find((p) => p.id === participantId);
+    // simple score stored on participant as `score` (create if missing)
+    if (participant) {
+      // @ts-expect-error add score dynamically
+      participant.score = (participant as any).score
+        ? (participant as any).score + 100
+        : 100;
+    }
+  }
+
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  return { guess, updatedRoom: cloneRoom(room) } as const;
+}
+
+export function getGuesses(code: string) {
+  const room = rooms.get(code);
+  if (!room) return null;
+  return room.guesses ? [...room.guesses] : [];
+}
+
+export function appendCanvasEvent(
+  code: string,
+  participantId: string,
+  event: CanvasEvent
+) {
+  const room = rooms.get(code);
+  if (!room) return { reason: "not-found" } as const;
+  if (room.drawerId !== participantId)
+    return { reason: "not-authorized" } as const;
+  room.canvasEvents = room.canvasEvents ?? [];
+  room.canvasEvents.push(event);
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+  return { ok: true } as const;
+}
+
+export function assignDrawerForFirstRound(room: Room) {
+  // choose drawer: prefer host if present, otherwise first participant by join order
+  let drawerId = room.hostId;
+  if (!drawerId || !room.participants.some((p) => p.id === drawerId)) {
+    drawerId = room.participants[0]?.id;
+  }
+
+  room.drawerId = drawerId;
+  return drawerId;
 }
 
 export function startGame(code: string, participantId: string) {
@@ -168,6 +257,11 @@ export function startGame(code: string, participantId: string) {
     return { reason: "not-enough" } as const;
   }
 
+  // Prevent starting if there are no starter words configured
+  if (!room.starterWordList || room.starterWordList.length === 0) {
+    return { reason: "no-words" } as const;
+  }
+
   if (room.status === "in-game") {
     return { reason: "already-in-game" } as const;
   }
@@ -176,14 +270,20 @@ export function startGame(code: string, participantId: string) {
   room.status = "in-game";
   room.roundIndex = 1;
 
-  // choose drawer: prefer host if present, otherwise first participant by join order
-  let drawerId = room.hostId;
-  if (!drawerId || !room.participants.some((p) => p.id === drawerId)) {
-    drawerId = room.participants[0]?.id;
+  // assign drawer and pick secret word
+  const drawerId = assignDrawerForFirstRound(room);
+  try {
+    room.secretWord = selectDeterministicWord(
+      room.seed ?? "",
+      room.roundIndex ?? 0,
+      room.starterWordList && room.starterWordList.length > 0
+        ? room.starterWordList
+        : STARTER_WORDS
+    );
+  } catch (e) {
+    // fallback to first word on error
+    room.secretWord = STARTER_WORDS[0];
   }
-
-  room.drawerId = drawerId;
-  room.secretWord = selectWord(room.seed, room.roundIndex);
   room.updatedAt = now();
   rooms.set(room.code, room);
 

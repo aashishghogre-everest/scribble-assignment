@@ -10,9 +10,15 @@ export interface RoomSnapshot {
   code: string;
   status: "lobby" | "in-game";
   hostId?: string;
+  // id of the drawer for the active round (if any)
+  drawerId?: string;
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
+  // secret word is present only for the drawer viewing their own room snapshot
+  secretWord?: string;
+  // immutable canvas events for rehydration and read-only viewers
+  canvasEvents?: unknown[];
 }
 
 export interface RoomSessionResponse {
@@ -37,11 +43,13 @@ async function request<T>(path: string, init?: RequestInit) {
       .json()
       .catch(() => ({ message: "Request failed" }))) as {
       message?: string;
+      code?: string;
     };
 
     const err = new Error(errorBody.message ?? "Request failed");
-    // attach HTTP status for the UI to provide friendlier feedback
+    // attach HTTP status and machine code for the UI to provide friendlier feedback
     (err as any).status = response.status;
+    (err as any).code = (errorBody as any).code;
     throw err;
   }
 
@@ -78,6 +86,29 @@ export const api = {
       {
         method: "POST",
         body: JSON.stringify({ participantId })
+      }
+    );
+  },
+  postGuess(code: string, participantId: string, text: string) {
+    return request<{ guess: unknown }>(
+      `/rooms/${encodeURIComponent(code)}/guesses`,
+      {
+        method: "POST",
+        body: JSON.stringify({ participantId, text })
+      }
+    );
+  },
+  fetchGuesses(code: string) {
+    return request<{ guesses: unknown[] }>(
+      `/rooms/${encodeURIComponent(code)}/guesses`
+    );
+  },
+  postCanvasEvent(code: string, participantId: string, event: any) {
+    return request<{ ok: boolean }>(
+      `/rooms/${encodeURIComponent(code)}/canvas-events`,
+      {
+        method: "POST",
+        body: JSON.stringify({ participantId, event })
       }
     );
   }

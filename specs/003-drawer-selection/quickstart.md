@@ -23,3 +23,8 @@ npm run dev
 4. Automated tests:
 
 - Add vitest integration tests that create an in-memory room using `seed/starterData.ts`, start a round, and assert that only the drawer client can fetch `/api/rooms/:id/rounds/:index/secret`.
+- Add vitest integration tests that create an in-memory room using `seed/starterData.ts`, start a round, and assert that only the drawer client can fetch `GET /api/rooms/:code/secret-word`.
+
+Notes:
+
+- If `ERR_NO_WORDS` is returned when starting a room, the host UI will show a clear message: "Cannot start game: no starter words configured." Ensure tests cover this edge case.
