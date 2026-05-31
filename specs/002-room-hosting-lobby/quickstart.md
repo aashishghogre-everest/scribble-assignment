@@ -23,6 +23,10 @@ Env vars
 
 - `ROOM_TTL_MS` — room time-to-live (ms) for empty/inactive rooms; default `300000` (5m).
 
+Polling
+
+- Lobby polling interval: clients poll `GET /rooms/:code` every ~2000ms with a small jitter (~±500ms) to reduce thundering-herd effects. This is the recommended default used by the frontend.
+
 Testing
 
 ```bash

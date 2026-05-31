@@ -8,12 +8,12 @@ This lab starts from a runnable but intentionally incomplete Scribble-style gues
 
 Granular, meaningful commits are encouraged so implementation decisions remain easy to assess.
 
-| Item | Details |
-|------|---------|
-| Project type | Brownfield enhancement |
-| Tech model | Frontend + minimal REST backend, in-memory store, manual room refresh in the starter; polling added by learners |
-| Difficulty | Intermediate |
-| Prerequisites | Comfort reading an existing codebase. |
+| Item          | Details                                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| Project type  | Brownfield enhancement                                                                                          |
+| Tech model    | Frontend + minimal REST backend, in-memory store, manual room refresh in the starter; polling added by learners |
+| Difficulty    | Intermediate                                                                                                    |
+| Prerequisites | Comfort reading an existing codebase.                                                                           |
 
 It already provides:
 
@@ -106,6 +106,11 @@ Backend endpoints currently available:
 - `POST /rooms/:code/join`
 - `GET /rooms/:code`
 
+Client polling and TTL
+
+- Lobby polling: the frontend polls `GET /rooms/:code` by default every ~2000ms with a small jitter (~±500ms) so multiple clients don't synchronize requests.
+- `ROOM_TTL_MS`: backend removes inactive rooms after `ROOM_TTL_MS` milliseconds (default `300000` / 5 minutes).
+
 The backend stores all room data in memory only. Restarting the backend clears all rooms.
 
 ## Run The Backend
@@ -187,12 +192,12 @@ Maintain these artifacts throughout the lab:
 
 Work through the scenarios in order and complete each checkpoint before moving to the next one.
 
-| Group | Scenario | What You Should Have By The End |
-|-------|----------|-------------------------------|
-| 1. Room setup and lobby | Scenario 1 | Host tracking on room creation, join validation with clear error messages, verified multi-room isolation, automatic lobby polling within about 2 seconds, host-only start with 2-player minimum |
-| 2. Game start and drawer flow | Scenario 2 | Player name validation (trim, reject empty), drawer assignment, deterministic secret word selection, drawer-only word visibility |
-| 3. Gameplay interaction | Scenario 3 | Interactive drawing canvas, clear canvas, guess submission with validation, synced guess history via polling, deterministic scoring |
-| 4. Result, restart, and final validation | Scenario 4 | Shared result state visible to all players, clean restart to lobby with players preserved and round state cleared |
+| Group                                    | Scenario   | What You Should Have By The End                                                                                                                                                                 |
+| ---------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Room setup and lobby                  | Scenario 1 | Host tracking on room creation, join validation with clear error messages, verified multi-room isolation, automatic lobby polling within about 2 seconds, host-only start with 2-player minimum |
+| 2. Game start and drawer flow            | Scenario 2 | Player name validation (trim, reject empty), drawer assignment, deterministic secret word selection, drawer-only word visibility                                                                |
+| 3. Gameplay interaction                  | Scenario 3 | Interactive drawing canvas, clear canvas, guess submission with validation, synced guess history via polling, deterministic scoring                                                             |
+| 4. Result, restart, and final validation | Scenario 4 | Shared result state visible to all players, clean restart to lobby with players preserved and round state cleared                                                                               |
 
 Complete a minimum of 4 specify iterations.
 
@@ -229,15 +234,15 @@ The following items are intentionally out of scope for this lab.
 
 Artifacts are graded for internal consistency, traceability to implementation, and quality of reasoning, not for rigid wording or template mimicry.
 
-| Area | What Good Looks Like |
-|------|---------------------|
-| Discovery | ≥3 gaps + ≥2 assumptions documented; relevant files listed |
-| Spec Kit artifacts | Constitution, spec, plan, tasks committed and internally consistent |
-| Working game flow | Two browsers can join a room, play one round, see synced result, restart |
-| Edge cases & validation | Empty/invalid inputs, case-insensitive guess, multi-room isolation handled |
-| Implementation alignment | Code behavior matches the spec; deviations are documented |
-| Reflection | Reflection explains decisions, AI usage, tradeoffs |
-| Submission clarity (code optional for product roles) | Submission is easy to review |
+| Area                                                 | What Good Looks Like                                                       |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| Discovery                                            | ≥3 gaps + ≥2 assumptions documented; relevant files listed                 |
+| Spec Kit artifacts                                   | Constitution, spec, plan, tasks committed and internally consistent        |
+| Working game flow                                    | Two browsers can join a room, play one round, see synced result, restart   |
+| Edge cases & validation                              | Empty/invalid inputs, case-insensitive guess, multi-room isolation handled |
+| Implementation alignment                             | Code behavior matches the spec; deviations are documented                  |
+| Reflection                                           | Reflection explains decisions, AI usage, tradeoffs                         |
+| Submission clarity (code optional for product roles) | Submission is easy to review                                               |
 
 ## Reflection Report
 

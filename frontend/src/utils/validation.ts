@@ -6,7 +6,8 @@ export function isValidRoomCode(raw: string) {
 export function roomCodeErrorMessage(raw: string) {
   const code = (raw || "").trim();
   if (code.length === 0) return "";
-  if (!/^[A-Za-z0-9]*$/.test(code)) return "Room code may only contain letters and numbers.";
+  if (!/^[A-Za-z0-9]*$/.test(code))
+    return "Room code may only contain letters and numbers.";
   if (code.length !== 4) return "Room code must be 4 characters.";
   return "";
 }
