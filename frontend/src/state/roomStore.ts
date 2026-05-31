@@ -122,12 +122,35 @@ export class RoomStore {
       return null;
     }
 
-    const response = await api.fetchRoom(
-      this.state.room.code,
-      this.state.participantId ?? undefined
-    );
-    this.setRoomSnapshot(response.room);
-    return response.room;
+    try {
+      const response = await api.fetchRoom(
+        this.state.room.code,
+        this.state.participantId ?? undefined
+      );
+      this.setRoomSnapshot(response.room);
+      return response.room;
+    } catch (err) {
+      // If the room was not found for this participant, attempt a reconnect
+      if (
+        this.state.participantId &&
+        err instanceof Error &&
+        (err as any).status === 404
+      ) {
+        try {
+          const reconnectResp = await api.reconnect(
+            this.state.room.code,
+            this.state.participantId
+          );
+          // on successful reconnect, update session and room
+          this.setRoomSession(reconnectResp);
+          return reconnectResp.room;
+        } catch (reErr) {
+          // swallow reconnect errors; caller can surface UI feedback
+        }
+      }
+
+      throw err;
+    }
   }
 
   async fetchGuesses() {

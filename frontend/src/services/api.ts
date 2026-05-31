@@ -136,5 +136,14 @@ export const api = {
     return request<{ lastRoundSummary: RoundSummary | null }>(
       `/rooms/${encodeURIComponent(code)}/last-round-summary`
     );
+  },
+  reconnect(code: string, participantId: string) {
+    return request<RoomSessionResponse>(
+      `/rooms/${encodeURIComponent(code)}/reconnect`,
+      {
+        method: "POST",
+        body: JSON.stringify({ participantId })
+      }
+    );
   }
 };

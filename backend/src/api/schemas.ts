@@ -68,6 +68,9 @@ export const restartRoomSchema = z.object({
   participantId: z.string()
 });
 
+export const reconnectSchema = z.object({
+  participantId: z.string()
+});
 export class HttpError extends Error {
   statusCode: number;
   code?: string;

@@ -134,6 +134,25 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+export function reconnectParticipant(code: string, participantId: string) {
+  const room = rooms.get(code);
+  if (!room) return { reason: "not-found" } as const;
+
+  const participant = room.participants.find((p) => p.id === participantId);
+  if (!participant) return { reason: "not-found" } as const;
+
+  // refresh joinedAt to indicate active reconnection
+  participant.joinedAt = now();
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  console.info(
+    `[roomStore] reconnectParticipant code=${room.code} participantId=${participantId}`
+  );
+
+  return { room: cloneRoom(room), participantId: participant.id } as const;
+}
+
 export function restartRoom(code: string, participantId: string) {
   const room = rooms.get(code);
   if (!room) return { reason: "not-found" } as const;
