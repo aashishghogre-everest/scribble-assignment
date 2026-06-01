@@ -65,51 +65,31 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+The frontend environment config feature primarily touches the `frontend/` package and adds a small runtime bootstrap/validation utility. Key files (existing and suggested):
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+frontend/
+├── vite.config.ts                        # build-time env conventions
+├── public/
+│   └── config.json                       # default runtime config used by bootstrap
+├── src/
+│   ├── config/
+│   │   └── bootstrap.ts                  # runtime-config bootstrap (reads overrides)
+│   ├── main.tsx                          # app entry (reads build-time env)
+│   ├── App.tsx
+│   └── pages/
+│       └── StartPage.tsx                 # example consumer of runtime config
+└── tests/
+    └── config.bootstrap.test.ts         # vitest tests for validation utility
 
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
-│   ├── models/
-│   ├── services/
+│   ├── server.ts                         # entry point (no API changes required for this feature)
 │   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+│       └── router.ts                     # existing router referenced by docs
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Implement `frontend/src/config/bootstrap.ts` and add unit tests under `frontend/tests/` to validate env resolution and override semantics.
 
 ## Complexity Tracking
 

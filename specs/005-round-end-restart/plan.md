@@ -61,43 +61,34 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
 │   ├── models/
+│   │   └── game.ts                        # room/round model (in-memory Room objects)
 │   ├── services/
+│   │   └── roomStore.ts                   # room lifecycle, restart logic, cleanup
 │   └── api/
+│       ├── rooms.ts                       # endpoints for restart/room management
+│       ├── restart.integration.test.ts     # integration tests (restart.*.test.ts exist)
+│       └── router.ts
 └── tests/
+    └── api/
+        ├── restart.integration.test.ts
+        ├── restart.secrets.test.ts
+        └── restart.timing.test.ts
 
 frontend/
 ├── src/
-│   ├── components/
 │   ├── pages/
-│   └── services/
+│   │   ├── ResultsPage.tsx                # shows end-of-round results and restart actions
+│   │   └── LobbyPage.tsx                  # room re-creation/join flow after restart
+│   └── state/
+│       └── roomStore.ts                   # client-side room state reset/rehydration
 └── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+    └── restart.flow.test.ts
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Reference and update the existing restart tests under `backend/tests/api/` and implement restart-related behavior in `backend/src/services/roomStore.ts` and `backend/src/api/rooms.ts`. Update `frontend/src/pages/ResultsPage.tsx` and `frontend/src/state/roomStore.ts` to support rehydration and navigation after a restart.
 
 ## Complexity Tracking
 

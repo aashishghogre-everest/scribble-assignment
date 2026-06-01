@@ -28,3 +28,37 @@ Implement guess submission, validation, scoring, and polling-based synchronizati
 
 - Polling frequency must balance timeliness vs server load; document recommended interval (e.g., 1s–3s during active round).
 - Large guess histories may require pagination or trimmed transport; prefer small per-round histories.
+
+## Project Structure
+
+This feature maps to specific backend endpoints, room state, and frontend components/tests:
+
+```text
+backend/
+├── src/
+│   ├── models/
+│   │   └── game.ts                        # room model: guess history + canvas events
+│   ├── services/
+│   │   └── roomStore.ts                   # manage guess history and canvas persistence
++│   └── api/
+│       ├── rooms.ts                       # implements POST/GET guesses endpoints
+│       └── router.ts
+└── tests/
+   └── api/
+      └── guesses.integration.test.ts    # existing integration tests
+
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── DrawerCanvas.tsx               # drawer drawing UI
+│   │   └── GuessForm.tsx                  # guess submission
+│   ├── services/
+│   │   ├── api.ts                         # HTTP helpers
+│   │   └── polling.ts                     # polling sync logic
+│   └── pages/
+│       └── GamePage.tsx
+└── tests/
+   └── DrawerCanvas.test.tsx
+```
+
+**Structure Decision**: Add/extend `backend/src/api/rooms.ts` (or new `guesses.ts`) for guess endpoints, add Zod schemas in `backend/src/api/schemas.ts`, and implement `DrawerCanvas` + `polling.ts` on the frontend.

@@ -94,51 +94,39 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+This feature touches backend room/round models and the frontend `GamePage` UI. Concrete file mappings and test locations:
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
 │   ├── models/
+│   │   └── game.ts                        # room/round model (in-memory Room objects)
 │   ├── services/
+│   │   ├── roomStore.ts                   # room lifecycle, drawer assignment
+│   │   └── wordSelector.ts                # deterministic selector implementation
 │   └── api/
+│       ├── rooms.ts                       # room endpoints (round start, assignment)
+│       └── schemas.ts                     # Zod schemas for requests/responses
 └── tests/
+    ├── services/
+    │   ├── roomStore.test.ts
+    │   └── wordSelector.test.ts
+    └── api/
+        └── rooms.test.ts
 
 frontend/
 ├── src/
-│   ├── components/
 │   ├── pages/
-│   └── services/
+│   │   └── GamePage.tsx                   # show drawer vs guesser UI
+│   ├── state/
+│   │   └── roomStore.ts                   # client-side room state/polling
+│   └── components/
+│       └── RoomCodeBadge.tsx
 └── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+    └── GamePage.test.tsx
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Implement the deterministic selector in `backend/src/services/wordSelector.ts`, add unit tests in `backend/tests/services/`, and update `backend/src/services/roomStore.ts` to call the selector on round start. Update `frontend/src/pages/GamePage.tsx` to render drawer-only secret UI based on room state.
 
 ## Complexity Tracking
 
